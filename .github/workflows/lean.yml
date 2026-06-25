@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
@@ -16,8 +16,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
       - name: Export canonical Lean certificate data
         run: python3 scripts/export_lean_certificate_hex.py
+      - name: Commit generated certificate data
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          if git diff --quiet -- data/lean; then
+            echo "Generated certificate data is already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/lean
+          git commit -m "pr3: regenerate Lean certificate hex data"
+          git push origin HEAD:${{ github.head_ref }}
       - name: Upload generated certificate data
         uses: actions/upload-artifact@v4
         with:
