@@ -1,3 +1,4 @@
 import KnuthFasc8AEx210.Closed.BooleanCertificate
 import KnuthFasc8AEx210.Closed.ByteParsing
+import KnuthFasc8AEx210.Closed.Formats
 import KnuthFasc8AEx210.Closed.Target
