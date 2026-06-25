@@ -45,7 +45,7 @@ theorem paperFactor_not_cube_dvd_of_two_simple_sectors
     (hw : SimpleRootAt (99 : F101) w) :
     ¬paperFactor ^ 3 ∣ p * u * w := by
   apply not_cube_dvd_of_two_simple_sectors (99 : F101) paperFactor_eval_99
-  · norm_num
+  · decide
   · exact hp
   · exact hu
   · exact hw
