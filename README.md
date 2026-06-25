@@ -3,6 +3,15 @@
 A reproducible, computer-assisted **disproof** of a conjecture about knight's-tour
 generating functions, with a concrete counterexample at board width **m = 5**, assisted primarily by GPT-5.5 Pro.
 
+## Lean 4 formalization
+
+This fork adds a Lean 4 proof kernel for the algebraic argument. See
+[LEAN4.md](LEAN4.md) for the theorem and build instructions, and
+[FORMALIZATION_DECISION.md](FORMALIZATION_DECISION.md) for the scope decision.
+The current Lean theorem consumes the exact mathematical claims established by
+the existing C++ certificate verifiers; it does not yet parse the large binary
+certificates or formalize the frontier-state generator inside the Lean kernel.
+
 ## The problem
 ![problem](Knuth-Fas-8A-Ex-210.png)
 
@@ -59,12 +68,14 @@ The full argument is in [PROOF.md](PROOF.md).
   serial fallback. On Apple clang (which rejects `-fopenmp`), build with
   `make OMPFLAGS= all`.
 
-No external mathematical library is used.
+The C++ verifier uses no external mathematical library. The Lean layer uses
+Lean 4.31.0 and mathlib `v4.31.0`.
 
 ## Build
 
 ```sh
 make all                 # or: make OMPFLAGS= all   (no OpenMP, e.g. Apple clang)
+lake update && lake build # Lean proof kernel
 ```
 
 ## Verify the claims
@@ -138,6 +149,9 @@ make certs-regenerate    # overwrites data/certs/*, then compare with sha256sum 
 | Path | Purpose |
 |---|---|
 | `PROOF.md` | The mathematical argument, end to end |
+| `LEAN4.md` | Lean theorem, module map, and trust boundary |
+| `FORMALIZATION_DECISION.md` | Formalization suitability assessment and phased plan |
+| `KnuthFasc8AEx210/` | Lean proof-kernel modules |
 | `src/transfer_generator.cpp` | Frontier (broken-profile) transfer generator for `T, U, W`; SCCs; terminal/coreachability checks |
 | `src/extract_blocks.cpp` | Reflection decomposition into +/- blocks; exact `W_rel = T_rel` check; singleton checks |
 | `src/sanity_counts.cpp` | Scalar closed/open counts, including terminal endpoint choices |

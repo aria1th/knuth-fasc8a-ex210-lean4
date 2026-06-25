@@ -1,0 +1,36 @@
+name: Lean 4
+
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Lean and restore the mathlib cache
+        uses: leanprover/lean-action@v1
+        continue-on-error: true
+        with:
+          auto-config: false
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: true
+      - name: Build the Lean library
+        run: lake build
+      - name: Reject proof placeholders and local axioms
+        shell: bash
+        run: |
+          if grep -RInE --include='*.lean' '(^|[[:space:]])(sorry|admit|axiom)([[:space:]]|$)' \
+              KnuthFasc8AEx210.lean KnuthFasc8AEx210; then
+            echo "Lean proof placeholder or local axiom found"
+            exit 1
+          fi
