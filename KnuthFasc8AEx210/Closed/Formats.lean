@@ -23,14 +23,14 @@ def kmv101Tag : Bytes := [75, 77, 86, 49, 48, 49, 0, 0]
 ascending order. -/
 structure KMP101 where
   coeffs : Bytes
-  deriving DecidableEq, Repr
+  deriving DecidableEq, Repr, Inhabited
 
 /-- Eigenvector payload from a `KMV101` file. -/
 structure KMV101 where
   dimension : Nat
   pivot : Nat
   entries : Bytes
-  deriving DecidableEq, Repr
+  deriving DecidableEq, Repr, Inhabited
 
 /-- All coefficients belong to `F_101`, and the polynomial is nonempty. -/
 def KMP101.valid (p : KMP101) : Bool :=
@@ -72,16 +72,24 @@ def parseKMV101? : Parser KMV101 := fun input =>
               | some (entries, rest) => some (⟨n, pivot, entries⟩, rest)
 
 /-- Parse a complete polynomial file and reject invalid or trailing data. -/
-def checkKMP101File (input : Bytes) : Bool :=
+def parseKMP101File? (input : Bytes) : Option KMP101 :=
   match parseKMP101? input with
-  | some (p, []) => p.valid
-  | _ => false
+  | some (p, []) => if p.valid then some p else none
+  | _ => none
 
 /-- Parse a complete eigenvector file and reject invalid or trailing data. -/
-def checkKMV101File (input : Bytes) : Bool :=
+def parseKMV101File? (input : Bytes) : Option KMV101 :=
   match parseKMV101? input with
-  | some (v, []) => v.valid
-  | _ => false
+  | some (v, []) => if v.valid then some v else none
+  | _ => none
+
+/-- Boolean form of `parseKMP101File?`. -/
+def checkKMP101File (input : Bytes) : Bool :=
+  (parseKMP101File? input).isSome
+
+/-- Boolean form of `parseKMV101File?`. -/
+def checkKMV101File (input : Bytes) : Bool :=
+  (parseKMV101File? input).isSome
 
 /-- A tiny synthetic `KMP101` file used to regression-test the parser. -/
 def kmp101Example : Bytes :=
@@ -94,10 +102,16 @@ def kmv101Example : Bytes :=
 example : parseKMP101? kmp101Example = some (⟨[1, 2, 3]⟩, []) := by
   native_decide
 
+example : parseKMP101File? kmp101Example = some ⟨[1, 2, 3]⟩ := by
+  native_decide
+
 example : checkKMP101File kmp101Example = true := by
   native_decide
 
 example : parseKMV101? kmv101Example = some (⟨3, 1, [0, 7, 9]⟩, []) := by
+  native_decide
+
+example : parseKMV101File? kmv101Example = some ⟨3, 1, [0, 7, 9]⟩ := by
   native_decide
 
 example : checkKMV101File kmv101Example = true := by
