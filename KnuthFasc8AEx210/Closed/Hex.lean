@@ -30,7 +30,7 @@ def decodeDigits? : List Char → Option Bytes
   | [_] => none
   | hi :: lo :: rest =>
       match nibble? hi, nibble? lo, decodeDigits? rest with
-      | some h, some l, some tail => some (16 * h + l :: tail)
+      | some h, some l, some tail => some ((16 * h + l) :: tail)
       | _, _, _ => none
 
 /-- Decode hexadecimal text, ignoring ASCII whitespace. -/
