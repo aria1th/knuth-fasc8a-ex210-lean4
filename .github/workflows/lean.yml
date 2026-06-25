@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
   build:
@@ -25,7 +26,32 @@ jobs:
           lint: false
           use-mathlib-cache: true
       - name: Build the Lean library
-        run: lake build
+        shell: bash
+        run: |
+          set +e
+          lake build > lean-build.log 2>&1
+          status=$?
+          if [ "$status" -ne 0 ]; then
+            grep -E -B 3 -A 20 '(^| )error:|^✖|Lean exited|build failed' lean-build.log \
+              | tail -n 300 > lean-errors.log
+            cat lean-errors.log
+          fi
+          exit "$status"
+      - name: Post failed-build diagnostics to the pull request
+        if: failure() && github.event_name == 'pull_request'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          {
+            echo '<!-- lean-ci-diagnostics -->'
+            echo '### Lean build diagnostics'
+            echo '```text'
+            cat lean-errors.log
+            echo '```'
+          } > lean-diagnostics.md
+          gh pr comment "$PR_NUMBER" --body-file lean-diagnostics.md
       - name: Reject proof placeholders and local axioms
         shell: bash
         run: |
