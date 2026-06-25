@@ -9,46 +9,27 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: leanprover/lean-action@v1
+      - name: Set up Lean and the mathlib cache
+        uses: leanprover/lean-action@v1
         with:
-          build: true
+          auto-config: false
+          build: false
+          test: false
+          lint: false
           use-mathlib-cache: true
-      - name: Capture concise diagnostics
-        if: failure()
+      - name: Build the Lean library
+        run: lake build
+      - name: Reject proof placeholders and local axioms
         shell: bash
         run: |
-          set +e
-          lake build > lean-build.log 2>&1
-          grep -E -B 2 -A 10 '(^| )error:|^✖|Building KnuthFasc8AEx210|Lean exited' lean-build.log \
-            | tail -n 300 > lean-errors.log
-          cat lean-errors.log
-          exit 0
-      - name: Post failed-build diagnostics to the pull request
-        if: failure() && github.event_name == 'pull_request'
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          {
-            echo '<!-- lean-ci-diagnostics -->'
-            echo '### Lean build diagnostics'
-            echo '```text'
-            cat lean-errors.log
-            echo '```'
-          } > lean-diagnostics.md
-          gh pr comment "$PR_NUMBER" --body-file lean-diagnostics.md
-      - name: Reject proof placeholders
-        shell: bash
-        run: |
-          if grep -RInE --include='*.lean' '\b(sorry|admit)\b' KnuthFasc8AEx210.lean KnuthFasc8AEx210; then
-            echo "Lean proof placeholder found"
+          if grep -RInE --include='*.lean' '(^|[[:space:]])(sorry|admit|axiom)([[:space:]]|$)' \
+              KnuthFasc8AEx210.lean KnuthFasc8AEx210; then
+            echo "Lean proof placeholder or local axiom found"
             exit 1
           fi
