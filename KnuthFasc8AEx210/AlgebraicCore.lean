@@ -106,7 +106,7 @@ section GaussBridge
 theorem intPolynomial_isPrimitive_of_coeff_zero_eq_one
     {p : ℤ[X]} (h0 : p.coeff 0 = 1) : p.IsPrimitive := by
   intro r hr
-  have hdiv : r ∣ p.coeff 0 := (C_dvd_iff_dvd_coeff.mp hr) 0
+  have hdiv : r ∣ p.coeff 0 := ((C_dvd_iff_dvd_coeff).mp hr) 0
   rw [h0] at hdiv
   exact isUnit_of_dvd_one hdiv
 
