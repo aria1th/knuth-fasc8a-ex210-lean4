@@ -1,0 +1,12 @@
+{
+  "data/certs/Trel_plus_eigen50.vec": {
+    "hex_file": "data/lean/Trel_plus_eigen50.vec.hex",
+    "sha256": "d38a64b7ef34ccfd4c714ac10970f996bc0ee7d5a76a6ef48f56da6920bb9ce9",
+    "size": 16847
+  },
+  "data/certs/visible76.poly": {
+    "hex_file": "data/lean/visible76.poly.hex",
+    "sha256": "4add074b2bfbfe3f51d9449e7291ef008c3ab4963d772fd8a51283bbcf004dc6",
+    "size": 4119
+  }
+}
