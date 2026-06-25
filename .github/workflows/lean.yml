@@ -24,7 +24,7 @@ jobs:
         if: github.event_name == 'pull_request'
         shell: bash
         run: |
-          if git diff --quiet -- data/lean; then
+          if [ -z "$(git status --porcelain -- data/lean)" ]; then
             echo "Generated certificate data is already current."
             exit 0
           fi
