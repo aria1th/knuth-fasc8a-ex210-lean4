@@ -40,7 +40,7 @@ namespace ThreeSectorCertificate
 variable {K : Type*} [Field K] {a : K}
 
 /-- Product of the three diagonal determinant sectors. -/
-def delta (c : ThreeSectorCertificate a) : K[X] :=
+noncomputable def delta (c : ThreeSectorCertificate a) : K[X] :=
   c.left.determinant * c.middle.determinant * c.right.determinant
 
 /-- Soundness of the compact three-sector interface. -/
