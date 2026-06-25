@@ -20,8 +20,8 @@ claims externally. This structure is the precise hand-off point for a future
 kernel-integrated Lean certificate reader.
 -/
 
-/-- Mathematical claims exported by the checked-in width-five certificates. -/
-structure SourceRepositoryCertificate (Q5 Q5Open Delta : ℤ[X]) : Prop where
+/-- Mathematical data and claims exported by the checked-in width-five certificates. -/
+structure SourceRepositoryCertificate (Q5 Q5Open Delta : ℤ[X]) where
   /-- Normalization of the reduced closed denominator. -/
   closed_constant : Q5.coeff 0 = 1
   /-- Normalization of the reduced open denominator. -/
