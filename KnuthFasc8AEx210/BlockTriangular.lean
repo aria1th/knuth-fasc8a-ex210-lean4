@@ -14,14 +14,14 @@ vertex `∞`. Its determinant factorization is a purely block-triangular fact.
 section
 
 variable {R : Type*} [CommRing R]
-variable {ι κ λ : Type*}
-variable [Fintype ι] [Fintype κ] [Fintype λ]
-variable [DecidableEq ι] [DecidableEq κ] [DecidableEq λ]
+variable {ι κ ν : Type*}
+variable [Fintype ι] [Fintype κ] [Fintype ν]
+variable [DecidableEq ι] [DecidableEq κ] [DecidableEq ν]
 
 /-- Determinant of a three-sector upper-triangular block matrix. -/
 theorem det_threeBlockUpper
-    (A : Matrix ι ι R) (B : Matrix ι (κ ⊕ λ) R)
-    (U : Matrix κ κ R) (Y : Matrix κ λ R) (W : Matrix λ λ R) :
+    (A : Matrix ι ι R) (B : Matrix ι (κ ⊕ ν) R)
+    (U : Matrix κ κ R) (Y : Matrix κ ν R) (W : Matrix ν ν R) :
     (Matrix.fromBlocks A B 0 (Matrix.fromBlocks U Y 0 W)).det =
       A.det * U.det * W.det := by
   rw [Matrix.det_fromBlocks_zero₂₁, Matrix.det_fromBlocks_zero₂₁, mul_assoc]
