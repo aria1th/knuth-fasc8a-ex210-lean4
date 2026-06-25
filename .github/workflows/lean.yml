@@ -7,6 +7,10 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,6 +20,29 @@ jobs:
         with:
           build: true
           use-mathlib-cache: true
+      - name: Re-run failed build and capture concise diagnostics
+        if: failure()
+        shell: bash
+        run: |
+          set +e
+          lake build > lean-build.log 2>&1
+          tail -n 160 lean-build.log
+          exit 0
+      - name: Post failed-build diagnostics to the pull request
+        if: failure() && github.event_name == 'pull_request'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          {
+            echo '<!-- lean-ci-diagnostics -->'
+            echo '### Lean build diagnostics'
+            echo '```text'
+            tail -n 160 lean-build.log
+            echo '```'
+          } > lean-diagnostics.md
+          gh pr comment "$PR_NUMBER" --body-file lean-diagnostics.md
       - name: Reject proof placeholders
         shell: bash
         run: |
