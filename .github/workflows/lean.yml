@@ -26,8 +26,8 @@ jobs:
         run: |
           set +e
           lake build > lean-build.log 2>&1
-          grep -E '(^| )error:|^✖|Building KnuthFasc8AEx210|Lean exited' lean-build.log \
-            | tail -n 200 > lean-errors.log
+          grep -E -B 2 -A 10 '(^| )error:|^✖|Building KnuthFasc8AEx210|Lean exited' lean-build.log \
+            | tail -n 300 > lean-errors.log
           cat lean-errors.log
           exit 0
       - name: Post failed-build diagnostics to the pull request
