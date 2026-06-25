@@ -76,21 +76,13 @@ theorem secondDerivative_ne_zero_of_two_simple_sectors
     (hp : SimpleRootAt a p) (hu : NonRootAt a u)
     (hw : SimpleRootAt a w) :
     eval a (derivative (derivative (p * u * w))) ≠ 0 := by
-  have hformula :
-      eval a (derivative (derivative (p * u * w))) =
-        (2 : K) * eval a (derivative p) * eval a u * eval a (derivative w) := by
-    calc
-      eval a (derivative (derivative (p * u * w))) =
-          eval a (derivative (derivative (p * u))) * eval a w
-            + (2 : K) * eval a (derivative (p * u)) * eval a (derivative w)
-            + eval a (p * u) * eval a (derivative (derivative w)) :=
-        eval_secondDerivative_mul a (p * u) w
-      _ = (2 : K) * eval a (derivative p) * eval a u * eval a (derivative w) := by
-        simp [derivative_mul, hp.eval_eq_zero, hw.eval_eq_zero]
-        ring_nf
-  rw [hformula]
+  rw [eval_secondDerivative_mul]
+  rw [hw.eval_eq_zero, mul_zero, zero_add]
+  rw [eval_mul, hp.eval_eq_zero, zero_mul, zero_mul, add_zero]
+  rw [derivative_mul, eval_add, eval_mul, eval_mul]
+  rw [hp.eval_eq_zero, zero_mul, add_zero]
   exact mul_ne_zero
-    (mul_ne_zero (mul_ne_zero h2 hp.derivative_ne_zero) hu.eval_ne_zero)
+    (mul_ne_zero h2 (mul_ne_zero hp.derivative_ne_zero hu.eval_ne_zero))
     hw.derivative_ne_zero
 
 /-- The factor cannot divide the three-sector product to exponent three. -/
