@@ -3,6 +3,9 @@
 This Lean project formalizes the algebraic proof kernel behind
 [`PROOF.md`](PROOF.md). It targets Lean 4.31.0 and mathlib `v4.31.0`.
 
+The scope decision and the reason for using the shorter second-derivative
+argument are recorded in [`FORMALIZATION_DECISION.md`](FORMALIZATION_DECISION.md).
+
 ## Main theorem
 
 `KnuthFasc8AEx210.SourceRepositoryCertificate.counterexample` states that the
@@ -49,7 +52,7 @@ CI runs the same build and rejects `sorry` and `admit` in Lean sources.
 ## Trust boundary and next implementation step
 
 The algebraic proof is kernel checked. The existing C++ programs still parse
-and verify the large binary matrix, eigenvector, and Wiedemann/Berlekamp–Massey
+and verify the large binary matrix, eigenvector, and Wiedemann/Berlekamp--Massey
 certificates. Lean currently consumes their mathematical conclusions through
 `SourceRepositoryCertificate`; it does not yet parse `.kmc`, `.vec`, `.poly`,
 or `.kwc2` files itself.
@@ -60,6 +63,10 @@ The next phase is a Lean certificate reader with proved soundness for:
 - the six rank certificates listed by `make rank-check`;
 - the `Wrel`/`Trel` permutation-similarity certificate produced by
   `src/extract_blocks.cpp`.
+
+A completely kernel-integrated proof of the original combinatorial statement
+would additionally need a formal proof that the generated frontier-state
+transfers enumerate exactly the relevant Hamiltonian tours.
 
 Until that phase is complete, this repository contains a fully checked proof
 kernel and an explicit, narrow computational interface rather than a wholly
