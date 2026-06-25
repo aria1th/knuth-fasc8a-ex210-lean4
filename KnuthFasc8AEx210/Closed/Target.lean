@@ -6,6 +6,8 @@ open Polynomial
 namespace KnuthFasc8AEx210
 namespace Closed
 
+universe u
+
 noncomputable section
 
 /-!
@@ -29,7 +31,7 @@ theorem counterexample_of_verified_source_certificate
     {Payload : Type u} {Q5 Q5Open Delta : ℤ[X]}
     (v : VerifiedBy Payload (fun _ => SourceRepositoryCertificate Q5 Q5Open Delta)) :
     ¬(Q5.map (Int.castRingHom ℚ)) ^ 3 ∣ Q5Open.map (Int.castRingHom ℚ) := by
-  exact SourceRepositoryCertificate.counterexample v.proof
+  exact SourceRepositoryCertificate.counterexample (VerifiedBy.proof v)
 
 /--
 The first closed-certification milestone: construct the source-repository
