@@ -1,0 +1,82 @@
+import KnuthFasc8AEx210.Closed.Hex
+import KnuthFasc8AEx210.Closed.Formats
+
+namespace KnuthFasc8AEx210
+namespace Closed
+namespace EmbeddedVisible
+
+open ByteParsing Formats
+
+/-!
+# Embedded visible-factor payloads
+
+The canonical hexadecimal text is generated deterministically from the two
+checked-in binary files.  Lean decodes and parses the text itself.
+-/
+
+/-- Canonical text representation of `visible76.poly`. -/
+def visible76Hex : String :=
+  include_str ".." / ".." / "data" / "lean" / "visible76.poly.hex"
+
+/-- Canonical text representation of `Trel_plus_eigen50.vec`. -/
+def eigen50Hex : String :=
+  include_str ".." / ".." / "data" / "lean" / "Trel_plus_eigen50.vec.hex"
+
+/-- Decoded bytes of the polynomial certificate. -/
+def visible76Bytes : Bytes :=
+  (Hex.decode? visible76Hex).getD []
+
+/-- Decoded bytes of the eigenvector certificate. -/
+def eigen50Bytes : Bytes :=
+  (Hex.decode? eigen50Hex).getD []
+
+/-- Parsed polynomial certificate. -/
+def visible76 : KMP101 :=
+  (parseKMP101File? visible76Bytes).getD default
+
+/-- Parsed eigenvector certificate. -/
+def eigen50 : KMV101 :=
+  (parseKMV101File? eigen50Bytes).getD default
+
+/-- The embedded polynomial text decodes without error. -/
+theorem visible76_decode_ok : Hex.decode? visible76Hex = some visible76Bytes := by
+  native_decide
+
+/-- The embedded eigenvector text decodes without error. -/
+theorem eigen50_decode_ok : Hex.decode? eigen50Hex = some eigen50Bytes := by
+  native_decide
+
+/-- The complete polynomial file has the expected format and field-valued coefficients. -/
+theorem visible76_parse_ok : parseKMP101File? visible76Bytes = some visible76 := by
+  native_decide
+
+/-- The complete eigenvector file has the expected format and a nonzero pivot. -/
+theorem eigen50_parse_ok : parseKMV101File? eigen50Bytes = some eigen50 := by
+  native_decide
+
+/-- The polynomial file contains coefficients `0` through `4106`. -/
+theorem visible76_coefficient_count : visible76.coeffs.length = 4107 := by
+  native_decide
+
+/-- The embedded eigenvector is for the `16831`-dimensional symmetric `Trel` block. -/
+theorem eigen50_dimension : eigen50.dimension = 16831 := by
+  native_decide
+
+/-- The released certificate uses coordinate zero as its nonzero pivot. -/
+theorem eigen50_pivot : eigen50.pivot = 0 := by
+  native_decide
+
+/-- The pivot coordinate is the nonzero field element `37`. -/
+theorem eigen50_pivot_value : eigen50.entries.getD eigen50.pivot 0 = 37 := by
+  native_decide
+
+/-- The decoded file sizes agree with the release manifest. -/
+theorem visible76_file_size : visible76Bytes.length = 4119 := by
+  native_decide
+
+theorem eigen50_file_size : eigen50Bytes.length = 16847 := by
+  native_decide
+
+end EmbeddedVisible
+end Closed
+end KnuthFasc8AEx210
