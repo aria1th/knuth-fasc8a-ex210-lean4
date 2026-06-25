@@ -7,9 +7,8 @@ namespace KnuthFasc8AEx210
 /-!
 # A derivative criterion for the multiplicity-two capacity bound
 
-For the concrete exponent three, it is enough to show that the second formal
-derivative is nonzero at a root of the proposed factor. This avoids exposing
-a separate valuation or Jordan-multiplicity API in the final theorem.
+For exponent three, nonvanishing of the second formal derivative at a root
+rules out cubic divisibility.
 -/
 
 section DerivativeIdentities
@@ -71,32 +70,7 @@ structure SimpleRootAt (a : K) (p : K[X]) : Prop where
 structure NonRootAt (a : K) (p : K[X]) : Prop where
   eval_ne_zero : eval a p ≠ 0
 
-/-- A simple root is a root of multiplicity exactly one. -/
-theorem SimpleRootAt.rootMultiplicity_eq_one
-    (a : K) {p : K[X]} (h : SimpleRootAt a p) : p.rootMultiplicity a = 1 := by
-  have hp0 : p ≠ 0 := by
-    intro hp
-    subst hp
-    simp at h.derivative_ne_zero
-  have hroot : p.IsRoot a := h.eval_eq_zero
-  have hpos : 0 < p.rootMultiplicity a := (rootMultiplicity_pos hp0).2 hroot
-  have hle : p.rootMultiplicity a ≤ 1 := by
-    by_contra hnot
-    have htwo : 1 < p.rootMultiplicity a := Nat.lt_of_not_ge hnot
-    have hderRoot : p.derivative.IsRoot a :=
-      ((one_lt_rootMultiplicity_iff_isRoot hp0).1 htwo).2
-    exact h.derivative_ne_zero hderRoot
-  omega
-
-/-- A nonroot has root multiplicity zero. -/
-theorem NonRootAt.rootMultiplicity_eq_zero
-    (a : K) {p : K[X]} (h : NonRootAt a p) : p.rootMultiplicity a = 0 := by
-  exact rootMultiplicity_eq_zero (by simpa [Polynomial.IsRoot] using h.eval_ne_zero)
-
-/--
-If exactly two displayed sectors have a simple root and the middle sector is
-regular there, their product has nonzero second derivative.
--/
+/-- Two simple sectors and one regular sector give a nonzero second derivative. -/
 theorem secondDerivative_ne_zero_of_two_simple_sectors
     (a : K) {p u w : K[X]} (h2 : (2 : K) ≠ 0)
     (hp : SimpleRootAt a p) (hu : NonRootAt a u)
@@ -119,7 +93,7 @@ theorem secondDerivative_ne_zero_of_two_simple_sectors
     (mul_ne_zero (mul_ne_zero h2 hp.derivative_ne_zero) hu.eval_ne_zero)
     hw.derivative_ne_zero
 
-/-- The Lean-friendly form of “the factor occurs exactly twice in `p*u*w`”. -/
+/-- The factor cannot divide the three-sector product to exponent three. -/
 theorem not_cube_dvd_of_two_simple_sectors
     (a : K) {f p u w : K[X]} (hf : eval a f = 0) (h2 : (2 : K) ≠ 0)
     (hp : SimpleRootAt a p) (hu : NonRootAt a u)
