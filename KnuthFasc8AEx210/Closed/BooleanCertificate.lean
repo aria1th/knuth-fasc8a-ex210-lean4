@@ -3,6 +3,8 @@ import Mathlib
 namespace KnuthFasc8AEx210
 namespace Closed
 
+universe u
+
 /-!
 # Boolean certificate wrapper
 
