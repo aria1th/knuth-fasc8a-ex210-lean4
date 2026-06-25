@@ -84,7 +84,10 @@ theorem ker_eq_span_singleton_of_injective_border
     obtain ⟨c, rfl⟩ :=
       (border_kernel_generator_and_no_chain H v φ hv hφv hborder).1 x hx
     exact Submodule.smul_mem _ c (Submodule.mem_span_singleton_self v)
-  · rw [Submodule.span_le]
+  · apply Submodule.span_le.2
+    intro x hx
+    have hxv : x = v := by simpa using hx
+    subst x
     exact LinearMap.mem_ker.mpr hv
 
 /-- The certified eigenvector is not in the range of the shifted operator. -/
