@@ -1,0 +1,25 @@
+name: Lean 4
+
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          build: true
+          use-mathlib-cache: true
+      - name: Reject proof placeholders
+        shell: bash
+        run: |
+          if grep -RInE --include='*.lean' '\b(sorry|admit)\b' KnuthFasc8AEx210.lean KnuthFasc8AEx210; then
+            echo "Lean proof placeholder found"
+            exit 1
+          fi
