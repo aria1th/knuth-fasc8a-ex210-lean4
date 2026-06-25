@@ -16,6 +16,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Export canonical Lean certificate data
+        run: python3 scripts/export_lean_certificate_hex.py
+      - name: Upload generated certificate data
+        uses: actions/upload-artifact@v4
+        with:
+          name: lean-certificate-hex
+          path: data/lean
+          if-no-files-found: error
+          retention-days: 7
       - name: Set up Lean and restore the mathlib cache
         uses: leanprover/lean-action@v1
         continue-on-error: true
