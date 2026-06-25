@@ -46,7 +46,7 @@ def take? : Nat → Bytes → Option (Bytes × Bytes)
   | n + 1, b :: bs =>
       match take? n bs with
       | none => none
-      | some (prefix, rest) => some (b :: prefix, rest)
+      | some (pre, rest) => some (b :: pre, rest)
 
 /-- Little-endian value of a byte list, interpreted without reducing modulo anything. -/
 def leNat : Bytes → Nat
