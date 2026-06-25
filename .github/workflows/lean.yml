@@ -15,14 +15,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build with Lean and mathlib
+      - name: Set up Lean and restore the mathlib cache
         uses: leanprover/lean-action@v1
+        continue-on-error: true
         with:
           auto-config: false
           build: true
           test: false
           lint: false
           use-mathlib-cache: true
+      - name: Build the Lean library
+        run: lake build
       - name: Reject proof placeholders and local axioms
         shell: bash
         run: |
