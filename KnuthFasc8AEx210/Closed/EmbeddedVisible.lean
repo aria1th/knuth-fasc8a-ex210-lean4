@@ -1,4 +1,4 @@
-import KnuthFasc8AEx210.Closed.Hex
+import KnuthFasc8AEx210.Closed.FastHex
 import KnuthFasc8AEx210.Closed.Formats
 
 namespace KnuthFasc8AEx210
@@ -22,13 +22,19 @@ def visible76Hex : String :=
 def eigen50Hex : String :=
   include_str ".." / ".." / "data" / "lean" / "Trel_plus_eigen50.vec.hex"
 
-/-- Decoded bytes of the polynomial certificate. -/
-def visible76Bytes : Bytes :=
-  (Hex.decode? visible76Hex).getD []
+/-- Decoded byte arrays of the two certificates. -/
+def visible76ByteArray : ByteArray :=
+  (FastHex.decode? visible76Hex).getD ByteArray.empty
 
-/-- Decoded bytes of the eigenvector certificate. -/
+def eigen50ByteArray : ByteArray :=
+  (FastHex.decode? eigen50Hex).getD ByteArray.empty
+
+/-- List views consumed by the small format parsers. -/
+def visible76Bytes : Bytes :=
+  FastHex.toNatList visible76ByteArray
+
 def eigen50Bytes : Bytes :=
-  (Hex.decode? eigen50Hex).getD []
+  FastHex.toNatList eigen50ByteArray
 
 /-- Parsed polynomial certificate. -/
 def visible76 : KMP101 :=
@@ -39,11 +45,13 @@ def eigen50 : KMV101 :=
   (parseKMV101File? eigen50Bytes).getD default
 
 /-- The embedded polynomial text decodes without error. -/
-theorem visible76_decode_ok : Hex.decode? visible76Hex = some visible76Bytes := by
+theorem visible76_decode_ok :
+    FastHex.decode? visible76Hex = some visible76ByteArray := by
   native_decide
 
 /-- The embedded eigenvector text decodes without error. -/
-theorem eigen50_decode_ok : Hex.decode? eigen50Hex = some eigen50Bytes := by
+theorem eigen50_decode_ok :
+    FastHex.decode? eigen50Hex = some eigen50ByteArray := by
   native_decide
 
 /-- The complete polynomial file has the expected format and field-valued coefficients. -/
@@ -71,10 +79,10 @@ theorem eigen50_pivot_value : eigen50.entries.getD eigen50.pivot 0 = 37 := by
   native_decide
 
 /-- The decoded file sizes agree with the release manifest. -/
-theorem visible76_file_size : visible76Bytes.length = 4119 := by
+theorem visible76_file_size : visible76ByteArray.size = 4119 := by
   native_decide
 
-theorem eigen50_file_size : eigen50Bytes.length = 16847 := by
+theorem eigen50_file_size : eigen50ByteArray.size = 16847 := by
   native_decide
 
 end EmbeddedVisible
