@@ -87,7 +87,7 @@ theorem secondDerivative_ne_zero_of_two_simple_sectors
         eval_secondDerivative_mul a (p * u) w
       _ = (2 : K) * eval a (derivative p) * eval a u * eval a (derivative w) := by
         simp [derivative_mul, hp.eval_eq_zero, hw.eval_eq_zero]
-        ring
+        ring_nf
   rw [hformula]
   exact mul_ne_zero
     (mul_ne_zero (mul_ne_zero h2 hp.derivative_ne_zero) hu.eval_ne_zero)
