@@ -16,20 +16,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Lean and the mathlib cache
-        uses: leanprover/lean-action@v1
+      - uses: leanprover/lean-action@v1
         with:
-          auto-config: false
-          build: false
+          build: true
           use-mathlib-cache: true
-      - name: Build
+      - name: Capture concise diagnostics
+        if: failure()
         shell: bash
         run: |
           set +e
           lake build > lean-build.log 2>&1
-          status=$?
-          tail -n 160 lean-build.log
-          exit "$status"
+          grep -E '(^| )error:|^✖|Building KnuthFasc8AEx210|Lean exited' lean-build.log \
+            | tail -n 200 > lean-errors.log
+          cat lean-errors.log
+          exit 0
       - name: Post failed-build diagnostics to the pull request
         if: failure() && github.event_name == 'pull_request'
         shell: bash
@@ -41,7 +41,7 @@ jobs:
             echo '<!-- lean-ci-diagnostics -->'
             echo '### Lean build diagnostics'
             echo '```text'
-            tail -n 160 lean-build.log
+            cat lean-errors.log
             echo '```'
           } > lean-diagnostics.md
           gh pr comment "$PR_NUMBER" --body-file lean-diagnostics.md
