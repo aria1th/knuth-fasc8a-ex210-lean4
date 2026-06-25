@@ -1,3 +1,4 @@
+import KnuthFasc8AEx210.OriginalProblem
 import KnuthFasc8AEx210.AlgebraicCore
 import KnuthFasc8AEx210.BlockTriangular
 import KnuthFasc8AEx210.Border
