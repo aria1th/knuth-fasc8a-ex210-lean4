@@ -83,7 +83,7 @@ theorem ker_eq_span_singleton_of_injective_border
   · intro x hx
     obtain ⟨c, rfl⟩ :=
       (border_kernel_generator_and_no_chain H v φ hv hφv hborder).1 x hx
-    exact Submodule.smul_mem _ c (Submodule.mem_span_singleton_self v)
+    exact Submodule.smul_mem (K ∙ v) c (Submodule.subset_span (by simp))
   · apply Submodule.span_le.2
     intro x hx
     have hxv : x = v := by simpa using hx
