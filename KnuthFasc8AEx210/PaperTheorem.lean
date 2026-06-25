@@ -6,6 +6,11 @@ open Polynomial
 
 namespace KnuthFasc8AEx210
 
+/-- Primality evidence exposing the field structure on `ZMod 101`. -/
+instance factPrime101 : Fact (Nat.Prime 101) := ⟨by norm_num⟩
+
+noncomputable section
+
 abbrev F101 := ZMod 101
 
 /-- Coefficientwise reduction modulo `101`. -/
@@ -17,7 +22,8 @@ def paperFactor : F101[X] := 1 - C 50 * X
 
 /-- Its root is `99 = 50⁻¹` in `F₁₀₁`. -/
 theorem paperFactor_eval_99 : eval (99 : F101) paperFactor = 0 := by
-  norm_num [paperFactor]
+  have h : (50 : F101) * 99 = 1 := by decide
+  simp [paperFactor, h]
 
 /-- A direct second-derivative certificate rules out the cube of `paperFactor`. -/
 theorem paperFactor_not_cube_dvd_of_secondDerivative
@@ -80,5 +86,7 @@ theorem widthFive_counterexample_of_constant_term_one
       open_dvd_delta := hOpenDelta
       visible_mod101 := hVisible
       capacity_mod101 := hCapacity }
+
+end
 
 end KnuthFasc8AEx210
