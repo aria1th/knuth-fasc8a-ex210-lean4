@@ -1,0 +1,36 @@
+name: Export Lean certificate data
+
+on:
+  push:
+    branches: ["pr3-closed-counterexample"]
+    paths:
+      - "data/certs/visible76.poly"
+      - "data/certs/Trel_plus_eigen50.vec"
+      - "scripts/export_lean_certificate_hex.py"
+      - ".github/workflows/export-lean-certificates.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: pr3-closed-counterexample
+      - name: Export canonical hexadecimal certificate data
+        run: python3 scripts/export_lean_certificate_hex.py
+      - name: Commit generated data when changed
+        shell: bash
+        run: |
+          if git diff --quiet -- data/lean; then
+            echo "Generated certificate data is already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/lean
+          git commit -m "pr3: regenerate Lean certificate hex data"
+          git push origin HEAD:pr3-closed-counterexample
