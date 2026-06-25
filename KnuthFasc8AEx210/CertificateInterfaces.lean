@@ -5,6 +5,8 @@ open Polynomial
 
 namespace KnuthFasc8AEx210
 
+noncomputable section
+
 /-!
 # Interfaces to the checked-in computational certificates
 
@@ -86,5 +88,7 @@ theorem widthFive_counterexample_of_three_sector_capacity
     ¬(Q.map (Int.castRingHom ℚ)) ^ 3 ∣ QOpen.map (Int.castRingHom ℚ) := by
   exact widthFive_counterexample_of_constant_term_one
     hQ0 hQOpen0 hOpenDelta hVisible c.factor_cube_not_dvd
+
+end
 
 end KnuthFasc8AEx210
