@@ -4,6 +4,8 @@ namespace KnuthFasc8AEx210
 namespace Closed
 namespace ByteParsing
 
+universe u v
+
 /-!
 # Small pure parsers for checked-in binary certificates
 
@@ -23,17 +25,17 @@ abbrev Parser (α : Type u) := Bytes → Option (α × Bytes)
 namespace Parser
 
 /-- Run two parsers in sequence. -/
-def bind (p : Parser α) (q : α → Parser β) : Parser β :=
+def bind {α : Type u} {β : Type v} (p : Parser α) (q : α → Parser β) : Parser β :=
   fun input =>
     match p input with
     | none => none
     | some (a, rest) => q a rest
 
 /-- Parser that returns a fixed value without consuming input. -/
-def pure (a : α) : Parser α := fun input => some (a, input)
+def pure {α : Type u} (a : α) : Parser α := fun input => some (a, input)
 
 /-- Parser failure. -/
-def fail : Parser α := fun _ => none
+def fail {α : Type u} : Parser α := fun _ => none
 
 end Parser
 
