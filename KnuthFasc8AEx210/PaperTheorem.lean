@@ -25,6 +25,12 @@ theorem paperFactor_eval_99 : eval (99 : F101) paperFactor = 0 := by
   have h : (50 : F101) * 99 = 1 := by decide
   simp [paperFactor, h]
 
+/-- Two is nonzero in `F₁₀₁`. -/
+theorem two_ne_zero_F101 : (2 : F101) ≠ 0 := by
+  intro h
+  have hdvd : 101 ∣ 2 := (ZMod.natCast_eq_zero_iff 2 101).mp h
+  norm_num at hdvd
+
 /-- A direct second-derivative certificate rules out the cube of `paperFactor`. -/
 theorem paperFactor_not_cube_dvd_of_secondDerivative
     {p : F101[X]}
@@ -44,11 +50,8 @@ theorem paperFactor_not_cube_dvd_of_two_simple_sectors
     (hu : NonRootAt (99 : F101) u)
     (hw : SimpleRootAt (99 : F101) w) :
     ¬paperFactor ^ 3 ∣ p * u * w := by
-  apply not_cube_dvd_of_two_simple_sectors (99 : F101) paperFactor_eval_99
-  · decide
-  · exact hp
-  · exact hu
-  · exact hw
+  exact not_cube_dvd_of_two_simple_sectors (99 : F101) paperFactor_eval_99
+    two_ne_zero_F101 hp hu hw
 
 /--
 The five mathematical claims that isolate the large computation from the
