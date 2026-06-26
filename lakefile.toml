@@ -9,3 +9,6 @@ rev = "v4.31.0"
 
 [[lean_lib]]
 name = "KnuthFasc8AEx210"
+
+[[lean_lib]]
+name = "KnuthFasc8AEx210Heavy"
