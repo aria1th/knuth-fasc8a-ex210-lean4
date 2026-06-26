@@ -14,19 +14,20 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_DIR = ROOT / "data" / "lean"
 
-# Small payloads embedded directly into Lean as canonical hexadecimal text.
+# Payloads embedded directly into Lean as canonical hexadecimal text. PR4 now
+# includes the 2.88 MB restricted matrix so Lean can check the released
+# eigenvector residual, not only its metadata.
 HEX_FILES = [
     Path("data/certs/visible76.poly"),
     Path("data/certs/Trel_plus_eigen50.vec"),
     Path("data/blocks/Tall_finish.vec"),
+    Path("data/blocks/Trel_plus.kmc"),
 ]
 
-# Large sparse matrices are recorded in the manifest first. This lets the next
-# PR4 slice choose a reviewable embedding/chunking strategy before duplicating
-# several megabytes of binary data as text.
+# The full reachable symmetric matrix remains metadata-only until the
+# restricted residual path is measured in CI.
 METADATA_ONLY_FILES = [
     Path("data/blocks/Tall_plus.kmc"),
-    Path("data/blocks/Trel_plus.kmc"),
 ]
 
 
