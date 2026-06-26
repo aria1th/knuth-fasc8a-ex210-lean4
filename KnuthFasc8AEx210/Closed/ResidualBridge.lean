@@ -35,6 +35,13 @@ theorem globalWitness_of_local {c : Chunk} {eigenvalue : Nat} {x : ByteArray}
     GlobalRowWitness c eigenvalue x (c.startRow + localRow) := by
   exact ⟨localRow, hlocal, rfl, h.rows localRow hlocal⟩
 
+/-- A certified local row gives a witness for any provably equal global row. -/
+theorem globalWitness_of_local_eq {c : Chunk} {eigenvalue : Nat} {x : ByteArray}
+    (h : Spec c eigenvalue x) {localRow globalRow : Nat}
+    (hlocal : localRow < c.rowCount) (hglobal : globalRow = c.startRow + localRow) :
+    GlobalRowWitness c eigenvalue x globalRow := by
+  exact ⟨localRow, hlocal, hglobal, h.rows localRow hlocal⟩
+
 /-- A successful executable chunk check gives global row witnesses for all local rows. -/
 theorem globalWitness_of_check {c : Chunk} {eigenvalue : Nat} {x : ByteArray}
     (hcheck : check c eigenvalue x = true) {localRow : Nat}
