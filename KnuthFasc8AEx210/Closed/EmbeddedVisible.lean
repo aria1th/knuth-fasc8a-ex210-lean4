@@ -15,11 +15,18 @@ def visible76Hex : String :=
 def eigen50Hex : String :=
   include_str ".." / ".." / "data" / "lean" / "Trel_plus_eigen50.vec.hex"
 
+/-- Canonical text representation of the symmetric closed terminal vector. -/
+def finishHex : String :=
+  include_str ".." / ".." / "data" / "lean" / "Tall_finish.vec.hex"
+
 def visible76ByteArray : ByteArray :=
   (FastHex.decode? visible76Hex).getD ByteArray.empty
 
 def eigen50ByteArray : ByteArray :=
   (FastHex.decode? eigen50Hex).getD ByteArray.empty
+
+def finishByteArray : ByteArray :=
+  (FastHex.decode? finishHex).getD ByteArray.empty
 
 def visible76Bytes : Bytes :=
   FastHex.toNatList visible76ByteArray
@@ -27,11 +34,17 @@ def visible76Bytes : Bytes :=
 def eigen50Bytes : Bytes :=
   FastHex.toNatList eigen50ByteArray
 
+def finishBytes : Bytes :=
+  FastHex.toNatList finishByteArray
+
 def visible76 : KMP101 :=
   (parseKMP101File? visible76Bytes).getD default
 
 def eigen50 : KMV101 :=
   (parseKMV101File? eigen50Bytes).getD default
+
+def finish : FinishVector :=
+  (parseFinishVectorFile? finishBytes).getD default
 
 theorem visible76_decode_ok :
     FastHex.decode? visible76Hex = some visible76ByteArray := by
@@ -41,10 +54,17 @@ theorem eigen50_decode_ok :
     FastHex.decode? eigen50Hex = some eigen50ByteArray := by
   native_decide
 
+theorem finish_decode_ok :
+    FastHex.decode? finishHex = some finishByteArray := by
+  native_decide
+
 theorem visible76_parse_ok : parseKMP101File? visible76Bytes = some visible76 := by
   native_decide
 
 theorem eigen50_parse_ok : parseKMV101File? eigen50Bytes = some eigen50 := by
+  native_decide
+
+theorem finish_parse_ok : parseFinishVectorFile? finishBytes = some finish := by
   native_decide
 
 theorem visible76_check_ok : checkKMP101File visible76Bytes = true := by
@@ -53,16 +73,25 @@ theorem visible76_check_ok : checkKMP101File visible76Bytes = true := by
 theorem eigen50_check_ok : checkKMV101File eigen50Bytes = true := by
   native_decide
 
+theorem finish_check_ok : checkFinishVectorFile finishBytes = true := by
+  native_decide
+
 theorem visible76_valid : visible76.valid = true := by
   native_decide
 
 theorem eigen50_valid : eigen50.valid = true := by
   native_decide
 
+theorem finish_valid : finish.valid = true := by
+  native_decide
+
 theorem visible76_coefficient_count : visible76.coeffs.length = 4107 := by
   native_decide
 
 theorem eigen50_dimension : eigen50.dimension = 16831 := by
+  native_decide
+
+theorem finish_dimension : finish.dimension = 18325 := by
   native_decide
 
 theorem eigen50_pivot : eigen50.pivot = 0 := by
@@ -75,6 +104,9 @@ theorem visible76_file_size : visible76ByteArray.size = 4119 := by
   native_decide
 
 theorem eigen50_file_size : eigen50ByteArray.size = 16847 := by
+  native_decide
+
+theorem finish_file_size : finishByteArray.size = 18329 := by
   native_decide
 
 end EmbeddedVisible
