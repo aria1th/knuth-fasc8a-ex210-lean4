@@ -16,7 +16,8 @@ Stable additions so far:
 - a semantic coverage checker proving that the 17 row intervals cover all `16,831` rows contiguously and exactly once;
 - generated Lean modules for all 17 released `Trel+` row-block residual certificates;
 - `TrelResidualCertificate`, a semantic wrapper combining row-block residuals with exact coverage;
-- a heavy root `KnuthFasc8AEx210Heavy` that imports and checks the semantic `Trel+` residual certificate separately from the ordinary proof-kernel root.
+- `FinalAssembly`, the no-`sorry` final theorem assembly point around the remaining source bridge;
+- a heavy root `KnuthFasc8AEx210Heavy` that imports and checks the semantic `Trel+` residual certificate and final assembly separately from the ordinary proof-kernel root.
 
 Current checked milestone:
 
@@ -27,8 +28,9 @@ Current checked milestone:
 5. Lean packages coverage plus the 17 residual chunks as one semantic certificate.
 6. Lean can convert a certified local residual row into a global row witness.
 7. Lean proves `∀ row < 16831`, some released chunk provides a residual witness for that row.
-8. CI builds the ordinary proof kernel and the heavy row-block target.
+8. Lean assembles the final counterexample theorem as soon as a `RemainingSourceBridge` converts current checked evidence into `SourceRepositoryCertificate`.
+9. CI builds the ordinary proof kernel and the heavy row-block/final-assembly target.
 
 What this closes: the `Trel+` restricted eigenvector residual `Trel+ v = 50 v` is now represented by Lean-checked row-block certificates rather than only by the C++ verifier output.
 
-What remains: the visible polynomial construction `r = g(A^2) beta`, the full-block `A^2 r = 76 r` and `A v = 50 v` checks, the rank/Wiedemann certificates, and the transfer-generator semantics are still future layers.
+What remains: the visible polynomial construction `r = g(A^2) beta`, the full-block `A^2 r = 76 r` and `A v = 50 v` checks, the rank/Wiedemann certificates, the `RemainingSourceBridge`, and the transfer-generator semantics are still future layers.
