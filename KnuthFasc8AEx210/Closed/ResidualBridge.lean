@@ -10,18 +10,17 @@ open ResidualChunk
 # Bridge from local row-block residuals to global row witnesses
 
 A row-block certificate proves residual equations for local row indices
-`0, ..., rowCount - 1`.  Later matrix-level lemmas need to talk about global
-row numbers.  This file provides the small semantic bridge from a local row
+`0, ..., rowCount - 1`. Later matrix-level lemmas need to talk about global
+row numbers. This file provides the small semantic bridge from a local row
 inside a chunk to the corresponding global row `startRow + localRow`.
 -/
 
 /-- A residual equation for a global row as witnessed by one row-block chunk. -/
-structure GlobalRowWitness (c : Chunk) (eigenvalue : Nat) (x : ByteArray)
-    (globalRow : Nat) : Prop where
-  localRow : Nat
-  local_lt : localRow < c.rowCount
-  global_eq : globalRow = c.startRow + localRow
-  residual :
+def GlobalRowWitness (c : Chunk) (eigenvalue : Nat) (x : ByteArray)
+    (globalRow : Nat) : Prop :=
+  ∃ localRow,
+    localRow < c.rowCount ∧
+    globalRow = c.startRow + localRow ∧
     rowDotMod101 c x localRow =
       UInt8.ofNat ((eigenvalue * x.data[c.startRow + localRow]!.toNat) % 101)
 
@@ -33,11 +32,8 @@ theorem rows_of_spec {c : Chunk} {eigenvalue : Nat} {x : ByteArray}
 /-- A certified local row gives a witnessed residual equation for its global row. -/
 theorem globalWitness_of_local {c : Chunk} {eigenvalue : Nat} {x : ByteArray}
     (h : Spec c eigenvalue x) {localRow : Nat} (hlocal : localRow < c.rowCount) :
-    GlobalRowWitness c eigenvalue x (c.startRow + localRow) where
-  localRow := localRow
-  local_lt := hlocal
-  global_eq := rfl
-  residual := h.rows localRow hlocal
+    GlobalRowWitness c eigenvalue x (c.startRow + localRow) := by
+  exact ⟨localRow, hlocal, rfl, h.rows localRow hlocal⟩
 
 /-- A successful executable chunk check gives global row witnesses for all local rows. -/
 theorem globalWitness_of_check {c : Chunk} {eigenvalue : Nat} {x : ByteArray}
