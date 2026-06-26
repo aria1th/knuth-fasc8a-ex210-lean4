@@ -9,17 +9,15 @@ universe u v
 /-!
 # Small pure parsers for checked-in binary certificates
 
-The C++ verifiers read fixed little-endian binary formats.  A closed Lean
-certificate checker should parse the same byte streams inside Lean.  This file
-contains a small pure parser core over `List Nat`; later commits can attach
-file-specific invariants such as `KMP101`, `KMV101`, `KMC201`, and `KMW2CERT`.
+The C++ verifiers read fixed little-endian binary formats. A closed Lean
+certificate checker should parse the same byte streams inside Lean.
 -/
 
-/-- A byte stream represented as natural numbers.  File-specific parsers should
-separately require every entry to be `< 256`. -/
+/-- A byte stream represented as natural numbers. File-specific parsers require
+entries to lie in the appropriate byte or field range. -/
 abbrev Bytes := List Nat
 
-/-- Parser type used for small certificate formats. -/
+/-- Parser type used for certificate formats. -/
 abbrev Parser (α : Type u) := Bytes → Option (α × Bytes)
 
 namespace Parser
@@ -48,7 +46,7 @@ def take? : Nat → Bytes → Option (Bytes × Bytes)
       | none => none
       | some (pre, rest) => some (b :: pre, rest)
 
-/-- Little-endian value of a byte list, interpreted without reducing modulo anything. -/
+/-- Little-endian value of a byte list, interpreted as a natural number. -/
 def leNat : Bytes → Nat
   | [] => 0
   | b :: bs => b + 256 * leNat bs
@@ -81,9 +79,23 @@ def tag? (tag : Bytes) : Parser Unit := fun input =>
   | some (got, rest) => if got = tag then some ((), rest) else none
   | none => none
 
+/-- Run the same parser exactly `n` times. -/
+def manyN? {α : Type u} (p : Parser α) : Nat → Parser (List α)
+  | 0 => fun input => some ([], input)
+  | n + 1 => fun input =>
+      match p input with
+      | none => none
+      | some (a, rest₁) =>
+          match manyN? p n rest₁ with
+          | none => none
+          | some (as, rest₂) => some (a :: as, rest₂)
+
 @[simp] theorem take?_zero (bs : Bytes) : take? 0 bs = some ([], bs) := rfl
 
 @[simp] theorem byte?_cons (b : Nat) (bs : Bytes) : byte? (b :: bs) = some (b, bs) := rfl
+
+@[simp] theorem manyN?_zero {α : Type u} (p : Parser α) (bs : Bytes) :
+    manyN? p 0 bs = some ([], bs) := rfl
 
 end ByteParsing
 end Closed
