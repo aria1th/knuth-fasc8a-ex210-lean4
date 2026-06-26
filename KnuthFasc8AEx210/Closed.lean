@@ -7,6 +7,5 @@ import KnuthFasc8AEx210.Closed.FastSparseMatrix
 import KnuthFasc8AEx210.Closed.ResidualChunk
 import KnuthFasc8AEx210.Closed.ResidualCoverage
 import KnuthFasc8AEx210.Closed.EmbeddedVisible
-import KnuthFasc8AEx210.Closed.EmbeddedTrelChunk0
 import KnuthFasc8AEx210.Closed.VisiblePayload
 import KnuthFasc8AEx210.Closed.Target
