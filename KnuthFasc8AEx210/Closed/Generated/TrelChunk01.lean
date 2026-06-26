@@ -22,14 +22,28 @@ def chunk : Chunk :=
 
 def payloadCheck (c : Chunk) : Bool :=
   (c.dimension == 16831) &&
-  (c.startRow == 1024) &&
-  (c.rowCount == 1024) &&
-  ResidualChunk.check c 50 eigen50Packed
+  ((c.startRow == 1024) &&
+    ((c.rowCount == 1024) &&
+      ResidualChunk.check c 50 eigen50Packed))
 
-def PayloadSpec (c : Chunk) : Prop :=
-  payloadCheck c = true
+structure PayloadSpec (c : Chunk) : Prop where
+  dimension : c.dimension = 16831
+  startRow : c.startRow = 1024
+  rowCount : c.rowCount = 1024
+  residual : ResidualChunk.Spec c 50 eigen50Packed
 
-theorem payloadCheck_sound (c : Chunk) (h : payloadCheck c = true) : PayloadSpec c := h
+theorem payloadCheck_sound (c : Chunk) (h : payloadCheck c = true) : PayloadSpec c := by
+  have parts :
+      c.dimension = 16831 ∧
+        (c.startRow = 1024 ∧
+          (c.rowCount = 1024 ∧
+            ResidualChunk.check c 50 eigen50Packed = true)) := by
+    simpa [payloadCheck, Bool.and_eq_true] using h
+  exact
+    { dimension := parts.1
+      startRow := parts.2.1
+      rowCount := parts.2.2.1
+      residual := ResidualChunk.check_sound c 50 eigen50Packed parts.2.2.2 }
 
 theorem released_check : payloadCheck chunk = true := by
   native_decide

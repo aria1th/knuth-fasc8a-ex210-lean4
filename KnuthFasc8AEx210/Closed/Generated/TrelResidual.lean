@@ -22,7 +22,7 @@ namespace Closed
 namespace Generated
 namespace TrelResidual
 
-/-- Closed Boolean-level certificate for every released `Trel+` residual row. -/
+/-- Semantic certificate for every released `Trel+` residual row. -/
 structure Certificate : Prop where
   coverage : ResidualCoverage.covers 16831 ResidualCoverage.trelRanges = true
   chunk00 : TrelChunk00.PayloadSpec TrelChunk00.chunk
@@ -43,7 +43,7 @@ structure Certificate : Prop where
   chunk15 : TrelChunk15.PayloadSpec TrelChunk15.chunk
   chunk16 : TrelChunk16.PayloadSpec TrelChunk16.chunk
 
-/-- All 17 row blocks are checked and cover all 16,831 rows exactly once. -/
+/-- All 17 semantic row-block certificates cover all 16,831 rows exactly once. -/
 theorem released : Certificate where
   coverage := ResidualCoverage.trelRanges_cover
   chunk00 := TrelChunk00.certified
