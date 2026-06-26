@@ -15,7 +15,7 @@ bytes packed and produces arrays directly.
 structure Cursor where
   bytes : ByteArray
   pos : Nat
-  deriving Inhabited, Repr
+  deriving Inhabited
 
 /-- Start reading a byte array at position zero. -/
 def Cursor.start (bytes : ByteArray) : Cursor := ⟨bytes, 0⟩
