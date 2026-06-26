@@ -36,6 +36,10 @@ structure KMV101 where
 def KMP101.valid (p : KMP101) : Bool :=
   (!p.coeffs.isEmpty) && p.coeffs.all (fun c => c < 101)
 
+/-- Proposition-level validity corresponding to `KMP101.valid`. -/
+def KMP101.Valid (p : KMP101) : Prop :=
+  p.valid = true
+
 /-- The vector length agrees with its header, its pivot is in range and nonzero,
 and all entries belong to `F_101`. -/
 def KMV101.valid (v : KMV101) : Bool :=
@@ -43,6 +47,10 @@ def KMV101.valid (v : KMV101) : Bool :=
     (v.pivot < v.dimension) &&
     (v.entries.getD v.pivot 0 != 0) &&
     v.entries.all (fun c => c < 101)
+
+/-- Proposition-level validity corresponding to `KMV101.valid`. -/
+def KMV101.Valid (v : KMV101) : Prop :=
+  v.valid = true
 
 /-- Parse the payload of a `KMP101` file, leaving any trailing bytes visible. -/
 def parseKMP101? : Parser KMP101 := fun input =>
@@ -83,6 +91,40 @@ def parseKMV101File? (input : Bytes) : Option KMV101 :=
   | some (v, []) => if v.valid then some v else none
   | _ => none
 
+/-- A successful complete `KMP101` parse is valid by construction. -/
+theorem parseKMP101File?_sound {input : Bytes} {p : KMP101}
+    (h : parseKMP101File? input = some p) : p.Valid := by
+  unfold parseKMP101File? at h
+  cases hparse : parseKMP101? input with
+  | none => simp [hparse] at h
+  | some parsed =>
+      rcases parsed with ⟨q, rest⟩
+      cases rest with
+      | nil =>
+          cases hvalid : q.valid
+          · simp [hparse, hvalid] at h
+          · simp [hparse, hvalid, KMP101.Valid] at h ⊢
+            exact h.symm ▸ hvalid
+      | cons b rest =>
+          simp [hparse] at h
+
+/-- A successful complete `KMV101` parse is valid by construction. -/
+theorem parseKMV101File?_sound {input : Bytes} {v : KMV101}
+    (h : parseKMV101File? input = some v) : v.Valid := by
+  unfold parseKMV101File? at h
+  cases hparse : parseKMV101? input with
+  | none => simp [hparse] at h
+  | some parsed =>
+      rcases parsed with ⟨w, rest⟩
+      cases rest with
+      | nil =>
+          cases hvalid : w.valid
+          · simp [hparse, hvalid] at h
+          · simp [hparse, hvalid, KMV101.Valid] at h ⊢
+            exact h.symm ▸ hvalid
+      | cons b rest =>
+          simp [hparse] at h
+
 /-- Boolean form of `parseKMP101File?`. -/
 def checkKMP101File (input : Bytes) : Bool :=
   (parseKMP101File? input).isSome
@@ -90,6 +132,22 @@ def checkKMP101File (input : Bytes) : Bool :=
 /-- Boolean form of `parseKMV101File?`. -/
 def checkKMV101File (input : Bytes) : Bool :=
   (parseKMV101File? input).isSome
+
+/-- Soundness of the Boolean complete-file check for `KMP101`. -/
+theorem checkKMP101File_sound {input : Bytes} (h : checkKMP101File input = true) :
+    ∃ p, parseKMP101File? input = some p ∧ p.Valid := by
+  unfold checkKMP101File at h
+  cases hparse : parseKMP101File? input with
+  | none => simp [hparse] at h
+  | some p => exact ⟨p, hparse, parseKMP101File?_sound hparse⟩
+
+/-- Soundness of the Boolean complete-file check for `KMV101`. -/
+theorem checkKMV101File_sound {input : Bytes} (h : checkKMV101File input = true) :
+    ∃ v, parseKMV101File? input = some v ∧ v.Valid := by
+  unfold checkKMV101File at h
+  cases hparse : parseKMV101File? input with
+  | none => simp [hparse] at h
+  | some v => exact ⟨v, hparse, parseKMV101File?_sound hparse⟩
 
 /-- A tiny synthetic `KMP101` file used to regression-test the parser. -/
 def kmp101Example : Bytes :=
