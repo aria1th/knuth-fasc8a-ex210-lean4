@@ -17,7 +17,8 @@ Stable additions so far:
 - generated Lean modules for all 17 released `Trel+` row-block residual certificates;
 - `TrelResidualCertificate`, a semantic wrapper combining row-block residuals with exact coverage;
 - `FinalAssembly`, the no-`sorry` final theorem assembly point around the remaining source bridge;
-- a heavy root `KnuthFasc8AEx210Heavy` that imports and checks the semantic `Trel+` residual certificate and final assembly separately from the ordinary proof-kernel root.
+- `BridgeBundles`, a bundle-level decomposition of the remaining bridge into denominator, visible-factor, Trel-residual, and capacity bundles;
+- a heavy root `KnuthFasc8AEx210Heavy` that imports and checks the semantic `Trel+` residual certificate, final assembly, and bundle bridge separately from the ordinary proof-kernel root.
 
 Current checked milestone:
 
@@ -29,8 +30,9 @@ Current checked milestone:
 6. Lean can convert a certified local residual row into a global row witness.
 7. Lean proves `∀ row < 16831`, some released chunk provides a residual witness for that row.
 8. Lean assembles the final counterexample theorem as soon as a `RemainingSourceBridge` converts current checked evidence into `SourceRepositoryCertificate`.
-9. CI builds the ordinary proof kernel and the heavy row-block/final-assembly target.
+9. Lean decomposes that remaining bridge into reviewable field-level bundles.
+10. CI builds the ordinary proof kernel and the heavy row-block/final-assembly/bundle target.
 
 What this closes: the `Trel+` restricted eigenvector residual `Trel+ v = 50 v` is now represented by Lean-checked row-block certificates rather than only by the C++ verifier output.
 
-What remains: the visible polynomial construction `r = g(A^2) beta`, the full-block `A^2 r = 76 r` and `A v = 50 v` checks, the rank/Wiedemann certificates, the `RemainingSourceBridge`, and the transfer-generator semantics are still future layers.
+What remains: the visible polynomial construction `r = g(A^2) beta`, the full-block `A^2 r = 76 r` and `A v = 50 v` checks, the rank/Wiedemann certificates, concrete construction of the remaining bundles, and the transfer-generator semantics are still future layers.
