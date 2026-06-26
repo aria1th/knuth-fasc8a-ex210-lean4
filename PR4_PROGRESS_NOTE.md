@@ -13,7 +13,8 @@ Stable additions so far:
 - a semantic soundness theorem for each chunk checker: a successful row-block check yields every local row residual equation in that interval;
 - a semantic coverage checker proving that the 17 row intervals cover all `16,831` rows contiguously and exactly once;
 - generated Lean modules for all 17 released `Trel+` row-block residual certificates;
-- a heavy root `KnuthFasc8AEx210Heavy` that imports and checks every generated `Trel+` row-block certificate separately from the ordinary proof-kernel root.
+- `TrelResidualCertificate`, a semantic wrapper combining row-block residuals with exact coverage;
+- a heavy root `KnuthFasc8AEx210Heavy` that imports and checks the semantic `Trel+` residual certificate separately from the ordinary proof-kernel root.
 
 Current checked milestone:
 
@@ -21,7 +22,8 @@ Current checked milestone:
 2. Lean parses and checks their binary formats and metadata.
 3. Lean parses and checks generated row-block residual certificates for the released `Trel+` eigenvector.
 4. Lean proves that the declared row intervals cover the whole `Trel+` block.
-5. CI builds both the ordinary proof kernel and the heavy row-block residual target.
+5. Lean packages coverage plus the 17 residual chunks as one semantic certificate.
+6. CI builds both the ordinary proof kernel and the heavy row-block residual target.
 
 What this closes: the `Trel+` restricted eigenvector residual `Trel+ v = 50 v` is now represented by Lean-checked row-block certificates rather than only by the C++ verifier output.
 
