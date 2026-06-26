@@ -1,4 +1,17 @@
 {
+  "data/blocks/Tall_finish.vec": {
+    "hex_file": "data/lean/Tall_finish.vec.hex",
+    "sha256": "b1e5eb2e9f27b164a28716b02879e130e5a8057c9b26f341eb013241420bcb85",
+    "size": 18329
+  },
+  "data/blocks/Tall_plus.kmc": {
+    "sha256": "c04a0b08245462f519736bac506411b5f1936a386e83c03934223d2184bd00ed",
+    "size": 3119425
+  },
+  "data/blocks/Trel_plus.kmc": {
+    "sha256": "55c89f1883f95c0a9cce964bd2193dbc1220badf216a75e198f50b24da9844cb",
+    "size": 2880301
+  },
   "data/certs/Trel_plus_eigen50.vec": {
     "hex_file": "data/lean/Trel_plus_eigen50.vec.hex",
     "sha256": "d38a64b7ef34ccfd4c714ac10970f996bc0ee7d5a76a6ef48f56da6920bb9ce9",
