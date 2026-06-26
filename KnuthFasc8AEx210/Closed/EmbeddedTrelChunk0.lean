@@ -27,15 +27,12 @@ def chunkBytes : ByteArray :=
 def chunk : Chunk :=
   (parseChunk? chunkBytes).getD default
 
-def eigenvector : ByteArray :=
-  ⟨eigen50.entries.toArray.map (fun value => UInt8.ofNat value)⟩
-
 /-- Executable specification of this exact released block. -/
 def payloadCheck (c : Chunk) : Bool :=
   (c.dimension == 16831) &&
   (c.startRow == 0) &&
   (c.rowCount == 1024) &&
-  ResidualChunk.check c 50 eigenvector
+  ResidualChunk.check c 50 eigen50Packed
 
 /-- Proposition-level wrapper for the executable block specification. -/
 def PayloadSpec (c : Chunk) : Prop :=
