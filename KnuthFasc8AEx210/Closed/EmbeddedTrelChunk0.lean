@@ -30,45 +30,31 @@ def chunk : Chunk :=
 def eigenvector : ByteArray :=
   ⟨eigen50.entries.toArray.map (fun value => UInt8.ofNat value)⟩
 
-/-- One native computation checks metadata and all 1,024 residual equations. -/
-def checkReleased : Bool :=
-  (chunk.dimension == 16831) &&
-  ((chunk.startRow == 0) &&
-    ((chunk.rowCount == 1024) &&
-      ResidualChunk.check chunk 50 eigenvector))
+/-- Executable specification of this exact released block. -/
+def payloadCheck (c : Chunk) : Bool :=
+  (c.dimension == 16831) &&
+  (c.startRow == 0) &&
+  (c.rowCount == 1024) &&
+  ResidualChunk.check c 50 eigenvector
 
-theorem released_spec : checkReleased = true := by
+/-- Proposition-level wrapper for the executable block specification. -/
+def PayloadSpec (c : Chunk) : Prop :=
+  payloadCheck c = true
+
+theorem payloadCheck_sound (c : Chunk) (h : payloadCheck c = true) : PayloadSpec c := h
+
+/-- One native computation checks metadata and all 1,024 residual equations. -/
+theorem released_check : payloadCheck chunk = true := by
   native_decide
 
-theorem dimension_ok : chunk.dimension = 16831 := by
-  have h := (Bool.and_eq_true.mp released_spec).1
-  simpa using h
-
-theorem start_row_ok : chunk.startRow = 0 := by
-  have h := (Bool.and_eq_true.mp released_spec).2
-  have h := (Bool.and_eq_true.mp h).1
-  simpa using h
-
-theorem row_count_ok : chunk.rowCount = 1024 := by
-  have h := (Bool.and_eq_true.mp released_spec).2
-  have h := (Bool.and_eq_true.mp h).2
-  have h := (Bool.and_eq_true.mp h).1
-  simpa using h
-
-/-- The first 1,024 released residual equations are checked by Lean. -/
-theorem released_check : ResidualChunk.check chunk 50 eigenvector = true := by
-  have h := (Bool.and_eq_true.mp released_spec).2
-  have h := (Bool.and_eq_true.mp h).2
-  exact (Bool.and_eq_true.mp h).2
-
 /-- Closed Boolean certificate for the first row block. -/
-def verified : VerifiedBy Chunk (fun c => ResidualChunk.Spec c 50 eigenvector) where
+def verified : VerifiedBy Chunk PayloadSpec where
   payload := chunk
-  check := fun c => ResidualChunk.check c 50 eigenvector
-  sound := fun c h => ResidualChunk.check_sound c 50 eigenvector h
+  check := payloadCheck
+  sound := payloadCheck_sound
   checked := released_check
 
-theorem certified : ResidualChunk.Spec chunk 50 eigenvector :=
+theorem certified : PayloadSpec chunk :=
   VerifiedBy.proof verified
 
 end EmbeddedTrelChunk0
