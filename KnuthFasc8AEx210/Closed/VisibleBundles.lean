@@ -59,6 +59,17 @@ theorem paperFactor_dvd_of_eval_99_eq_zero {p : F101[X]}
     norm_num [paperFactor]
   exact hfac.trans hx
 
+/-- Conversely, a multiple of the paper factor vanishes at `99`. -/
+theorem eval_99_eq_zero_of_paperFactor_dvd {p : F101[X]}
+    (hdiv : paperFactor ∣ p) : eval (99 : F101) p = 0 := by
+  rcases hdiv with ⟨q, rfl⟩
+  simp [paperFactor_eval_99]
+
+/-- The paper factor divisibility test is exactly evaluation at its root `99`. -/
+theorem paperFactor_dvd_iff_eval_99_eq_zero {p : F101[X]} :
+    paperFactor ∣ p ↔ eval (99 : F101) p = 0 :=
+  ⟨eval_99_eq_zero_of_paperFactor_dvd, paperFactor_dvd_of_eval_99_eq_zero⟩
+
 /--
 The remaining visible-factor bridge.
 
@@ -85,6 +96,12 @@ def VisibleRootBridge.toVisibleAlgebraBridge {Q5 : ℤ[X]}
     (b : VisibleRootBridge Q5) : VisibleAlgebraBridge Q5 where
   parsed := b.parsed
   visible_factor := paperFactor_dvd_of_eval_99_eq_zero b.root_at_99
+
+/-- Convert visible-factor divisibility back to the root-vanishing bridge. -/
+def VisibleAlgebraBridge.toVisibleRootBridge {Q5 : ℤ[X]}
+    (b : VisibleAlgebraBridge Q5) : VisibleRootBridge Q5 where
+  parsed := b.parsed
+  root_at_99 := eval_99_eq_zero_of_paperFactor_dvd b.visible_factor
 
 /-- Convert the split visible bridge to the bundle consumed by final assembly. -/
 def VisibleAlgebraBridge.toVisibleFactorBundle {Q5 : ℤ[X]}
