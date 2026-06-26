@@ -49,6 +49,32 @@ theorem currentParsedVisibleBundle : ParsedVisibleBundle where
   eigen_file_size := EmbeddedVisible.eigen50_file_size
   finish_file_size := EmbeddedVisible.finish_file_size
 
+/-- If `99` is a root of a modular denominator, then the paper factor divides it. -/
+theorem paperFactor_dvd_of_eval_99_eq_zero {p : F101[X]}
+    (hroot : eval (99 : F101) p = 0) : paperFactor ∣ p := by
+  have hx : X - C (99 : F101) ∣ p := by
+    exact Polynomial.dvd_iff_isRoot.mpr (by simpa [Polynomial.IsRoot] using hroot)
+  have hfac : paperFactor ∣ X - C (99 : F101) := by
+    refine ⟨C (2 : F101), ?_⟩
+    norm_num [paperFactor]
+  exact hfac.trans hx
+
+/--
+A lower-level visible bridge: it is enough to prove root vanishing at `99`.
+
+The finite certificate checkers should ultimately target this structure before
+it is converted to the divisibility form.
+-/
+structure VisibleRootBridge (Q5 : ℤ[X]) : Prop where
+  parsed : ParsedVisibleBundle
+  root_at_99 : eval (99 : F101) (mod101 Q5) = 0
+
+/-- Convert root vanishing into the algebraic visible-factor bridge. -/
+def VisibleRootBridge.toVisibleAlgebraBridge {Q5 : ℤ[X]}
+    (b : VisibleRootBridge Q5) : VisibleAlgebraBridge Q5 where
+  parsed := b.parsed
+  visible_factor := paperFactor_dvd_of_eval_99_eq_zero b.root_at_99
+
 /--
 The remaining visible-factor bridge.
 
@@ -65,6 +91,18 @@ def VisibleAlgebraBridge.toVisibleFactorBundle {Q5 : ℤ[X]}
     (b : VisibleAlgebraBridge Q5) : BridgeBundles.VisibleFactorBundle Q5 where
   payload := b.parsed.payload
   visible_factor := b.visible_factor
+
+/-- A version of the final theorem using root-vanishing as the visible bridge. -/
+theorem widthFiveNondivisibility_of_visibleRootBridge
+    {Q5 Q5Open Delta : ℤ[X]}
+    (den : BridgeBundles.DenominatorBundle Q5 Q5Open Delta)
+    (vis : VisibleRootBridge Q5)
+    (cap : BridgeBundles.CapacityBundle Delta) :
+    FinalAssembly.WidthFiveNondivisibility Q5 Q5Open := by
+  exact BridgeBundles.SourceBridgeBundles.widthFiveNondivisibility
+    { denominator := den
+      visible := vis.toVisibleAlgebraBridge.toVisibleFactorBundle
+      capacity := cap }
 
 /-- A version of the final theorem using the split visible bridge. -/
 theorem widthFiveNondivisibility_of_visibleBridge
