@@ -31,22 +31,30 @@ def matrix : KMC201 :=
 def eigenvector : ByteArray :=
   ⟨eigen50.entries.toArray.map (fun n => UInt8.ofNat n)⟩
 
-/-- Combined closed specification checked by one native computation. -/
+/-- Boolean form of the released matrix/eigenvector metadata and residual check. -/
+def checkReleased : Bool :=
+  (FastHex.decode? matrixHex == some matrixBytes) &&
+  (parseKMC201? matrixBytes == some matrix) &&
+  (matrix.dimension == 16831) &&
+  (matrix.prime == 101) &&
+  (eigenvector.size == 16831) &&
+  checkEigenMod101 matrix 50 eigenvector
+
+/-- Proposition-level wrapper for the executable released check. -/
 def ReleasedSpec : Prop :=
-  FastHex.decode? matrixHex = some matrixBytes ∧
-  parseKMC201? matrixBytes = some matrix ∧
-  matrix.dimension = 16831 ∧
-  matrix.prime = 101 ∧
-  eigenvector.size = 16831 ∧
-  checkEigenMod101 matrix 50 eigenvector = true
+  checkReleased = true
 
 /-- Lean decodes the matrix and verifies the complete eigenvector residual. -/
 theorem released_spec : ReleasedSpec := by
   native_decide
 
+/-- The executable residual check succeeds. -/
+theorem eigen_residual_ok : checkEigenMod101 matrix 50 eigenvector = true := by
+  native_decide
+
 /-- Proposition-level residual certificate extracted from the closed checker. -/
 theorem eigen_spec : EigenSpec matrix 50 eigenvector :=
-  checkEigenMod101_sound matrix 50 eigenvector released_spec.2.2.2.2.2
+  checkEigenMod101_sound matrix 50 eigenvector eigen_residual_ok
 
 /-- The released pivot remains nonzero in the packed representation. -/
 theorem eigenvector_pivot_nonzero : eigenvector.data[0]! = 37 := by
