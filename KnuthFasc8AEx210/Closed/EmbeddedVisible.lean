@@ -46,6 +46,10 @@ def eigen50 : KMV101 :=
 def finish : FinishVector :=
   (parseFinishVectorFile? finishBytes).getD default
 
+/-- Packed representation shared by all residual row-block checkers. -/
+def eigen50Packed : ByteArray :=
+  ⟨eigen50.entries.toArray.map (fun value => UInt8.ofNat value)⟩
+
 theorem visible76_decode_ok :
     FastHex.decode? visible76Hex = some visible76ByteArray := by
   native_decide
@@ -89,6 +93,9 @@ theorem visible76_coefficient_count : visible76.coeffs.length = 4107 := by
   native_decide
 
 theorem eigen50_dimension : eigen50.dimension = 16831 := by
+  native_decide
+
+theorem eigen50Packed_size : eigen50Packed.size = 16831 := by
   native_decide
 
 theorem finish_dimension : finish.dimension = 18325 := by
