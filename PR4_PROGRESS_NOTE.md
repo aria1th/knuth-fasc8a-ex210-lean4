@@ -11,6 +11,7 @@ Stable additions so far:
 - an array-based `KMC201` parser and generic CSR residual checker over byte vectors;
 - row-block `KRC101` residual chunk format, parser, and checker;
 - a semantic soundness theorem for each chunk checker: a successful row-block check yields every local row residual equation in that interval;
+- a semantic bridge from local row indices to global row witnesses `startRow + localRow`;
 - a semantic coverage checker proving that the 17 row intervals cover all `16,831` rows contiguously and exactly once;
 - generated Lean modules for all 17 released `Trel+` row-block residual certificates;
 - `TrelResidualCertificate`, a semantic wrapper combining row-block residuals with exact coverage;
@@ -23,7 +24,8 @@ Current checked milestone:
 3. Lean parses and checks generated row-block residual certificates for the released `Trel+` eigenvector.
 4. Lean proves that the declared row intervals cover the whole `Trel+` block.
 5. Lean packages coverage plus the 17 residual chunks as one semantic certificate.
-6. CI builds both the ordinary proof kernel and the heavy row-block residual target.
+6. Lean can convert a certified local residual row into a global row witness.
+7. CI builds the ordinary proof kernel; the heavy row-block target is built separately.
 
 What this closes: the `Trel+` restricted eigenvector residual `Trel+ v = 50 v` is now represented by Lean-checked row-block certificates rather than only by the C++ verifier output.
 
