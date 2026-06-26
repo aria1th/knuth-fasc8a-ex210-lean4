@@ -9,9 +9,8 @@ open ByteCursor
 /-!
 # Array-based `KMC201` parser and residual checker
 
-Unlike the list-based reference checker in `SparseMatrix.lean`, this module
-keeps multi-megabyte matrices packed in arrays. It is the execution path meant
-for the released `Tall_plus.kmc` and `Trel_plus.kmc` files.
+This module keeps multi-megabyte matrices packed in arrays. It is the execution
+path meant for the released `Tall_plus.kmc` and `Trel_plus.kmc` files.
 -/
 
 def kmc201Tag : ByteArray := ⟨#[75, 77, 67, 50, 48, 49, 0, 0]⟩
@@ -26,7 +25,7 @@ structure KMC201 where
   columns : Array Nat
   values : ByteArray
   representatives : Array Nat
-  deriving Inhabited, Repr
+  deriving Inhabited
 
 /-- Check that an array is nondecreasing. -/
 def nondecreasing (xs : Array Nat) : Bool := Id.run do
@@ -108,7 +107,9 @@ def checkEigenMod101 (m : KMC201) (lam : Nat) (x : ByteArray) : Bool :=
 /-- Soundness of `checkEigenMod101`. -/
 theorem checkEigenMod101_sound (m : KMC201) (lam : Nat) (x : ByteArray)
     (h : checkEigenMod101 m lam x = true) : EigenSpec m lam x := by
-  exact of_decide_eq_true h
+  have h' : decide (EigenSpec m lam x) = true := by
+    simpa [checkEigenMod101] using h
+  exact of_decide_eq_true h'
 
 /-- A small identity matrix used to regression-test the packed execution path. -/
 def identity2 : KMC201 where
