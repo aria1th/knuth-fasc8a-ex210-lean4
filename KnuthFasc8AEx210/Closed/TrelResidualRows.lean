@@ -1,3 +1,4 @@
+import Mathlib
 import KnuthFasc8AEx210.Closed.ResidualBridge
 import KnuthFasc8AEx210.Closed.TrelResidualCertificate
 
@@ -9,7 +10,7 @@ namespace TrelResidualRows
 # Global row witnesses for the released `Trel+` residual
 
 `TrelResidualCertificate.released` packages the generated row-block certificates
-and the coverage theorem.  This file projects every generated local residual
+and the coverage theorem. This file projects every generated local residual
 certificate into global row witnesses for rows `startRow + localRow`.
 -/
 
@@ -108,6 +109,129 @@ theorem released : GlobalWitnesses where
     globalWitness_of_local Generated.TrelChunk15.certified.residual hlocal
   chunk16 := fun localRow hlocal =>
     globalWitness_of_local Generated.TrelChunk16.certified.residual hlocal
+
+/-- Some released chunk witnesses the residual equation for a global row. -/
+def SomeGlobalWitness (globalRow : Nat) : Prop :=
+  ∃ c : ResidualChunk.Chunk,
+    GlobalRowWitness c 50 EmbeddedVisible.eigen50Packed globalRow
+
+/-- A certified interval supplies global row witnesses for all rows inside it. -/
+theorem someGlobalWitness_of_interval {c : ResidualChunk.Chunk} {start count row : Nat}
+    (hres : ResidualChunk.Spec c 50 EmbeddedVisible.eigen50Packed)
+    (hstart : c.startRow = start) (hcount : c.rowCount = count)
+    (hlo : start ≤ row) (hhi : row < start + count) : SomeGlobalWitness row := by
+  let localRow := row - start
+  refine ⟨c, globalWitness_of_local_eq hres (localRow := localRow) ?_ ?_⟩
+  · rw [hcount]
+    omega
+  · rw [hstart]
+    dsimp [localRow]
+    omega
+
+/-- Every global row of the released `Trel+` block has a row-block residual witness. -/
+theorem someGlobalWitness_of_lt_16831 (row : Nat) (hrow : row < 16831) :
+    SomeGlobalWitness row := by
+  by_cases h00 : row < 1024
+  · exact someGlobalWitness_of_interval
+      (c := Generated.TrelChunk00.chunk) (start := 0) (count := 1024) (row := row)
+      Generated.TrelChunk00.certified.residual
+      Generated.TrelChunk00.certified.startRow Generated.TrelChunk00.certified.rowCount
+      (by omega) (by omega)
+  · by_cases h01 : row < 2048
+    · exact someGlobalWitness_of_interval
+        (c := Generated.TrelChunk01.chunk) (start := 1024) (count := 1024) (row := row)
+        Generated.TrelChunk01.certified.residual
+        Generated.TrelChunk01.certified.startRow Generated.TrelChunk01.certified.rowCount
+        (by omega) (by omega)
+    · by_cases h02 : row < 3072
+      · exact someGlobalWitness_of_interval
+          (c := Generated.TrelChunk02.chunk) (start := 2048) (count := 1024) (row := row)
+          Generated.TrelChunk02.certified.residual
+          Generated.TrelChunk02.certified.startRow Generated.TrelChunk02.certified.rowCount
+          (by omega) (by omega)
+      · by_cases h03 : row < 4096
+        · exact someGlobalWitness_of_interval
+            (c := Generated.TrelChunk03.chunk) (start := 3072) (count := 1024) (row := row)
+            Generated.TrelChunk03.certified.residual
+            Generated.TrelChunk03.certified.startRow Generated.TrelChunk03.certified.rowCount
+            (by omega) (by omega)
+        · by_cases h04 : row < 5120
+          · exact someGlobalWitness_of_interval
+              (c := Generated.TrelChunk04.chunk) (start := 4096) (count := 1024) (row := row)
+              Generated.TrelChunk04.certified.residual
+              Generated.TrelChunk04.certified.startRow Generated.TrelChunk04.certified.rowCount
+              (by omega) (by omega)
+          · by_cases h05 : row < 6144
+            · exact someGlobalWitness_of_interval
+                (c := Generated.TrelChunk05.chunk) (start := 5120) (count := 1024) (row := row)
+                Generated.TrelChunk05.certified.residual
+                Generated.TrelChunk05.certified.startRow Generated.TrelChunk05.certified.rowCount
+                (by omega) (by omega)
+            · by_cases h06 : row < 7168
+              · exact someGlobalWitness_of_interval
+                  (c := Generated.TrelChunk06.chunk) (start := 6144) (count := 1024) (row := row)
+                  Generated.TrelChunk06.certified.residual
+                  Generated.TrelChunk06.certified.startRow Generated.TrelChunk06.certified.rowCount
+                  (by omega) (by omega)
+              · by_cases h07 : row < 8192
+                · exact someGlobalWitness_of_interval
+                    (c := Generated.TrelChunk07.chunk) (start := 7168) (count := 1024) (row := row)
+                    Generated.TrelChunk07.certified.residual
+                    Generated.TrelChunk07.certified.startRow Generated.TrelChunk07.certified.rowCount
+                    (by omega) (by omega)
+                · by_cases h08 : row < 9216
+                  · exact someGlobalWitness_of_interval
+                      (c := Generated.TrelChunk08.chunk) (start := 8192) (count := 1024) (row := row)
+                      Generated.TrelChunk08.certified.residual
+                      Generated.TrelChunk08.certified.startRow Generated.TrelChunk08.certified.rowCount
+                      (by omega) (by omega)
+                  · by_cases h09 : row < 10240
+                    · exact someGlobalWitness_of_interval
+                        (c := Generated.TrelChunk09.chunk) (start := 9216) (count := 1024) (row := row)
+                        Generated.TrelChunk09.certified.residual
+                        Generated.TrelChunk09.certified.startRow Generated.TrelChunk09.certified.rowCount
+                        (by omega) (by omega)
+                    · by_cases h10 : row < 11264
+                      · exact someGlobalWitness_of_interval
+                          (c := Generated.TrelChunk10.chunk) (start := 10240) (count := 1024) (row := row)
+                          Generated.TrelChunk10.certified.residual
+                          Generated.TrelChunk10.certified.startRow Generated.TrelChunk10.certified.rowCount
+                          (by omega) (by omega)
+                      · by_cases h11 : row < 12288
+                        · exact someGlobalWitness_of_interval
+                            (c := Generated.TrelChunk11.chunk) (start := 11264) (count := 1024) (row := row)
+                            Generated.TrelChunk11.certified.residual
+                            Generated.TrelChunk11.certified.startRow Generated.TrelChunk11.certified.rowCount
+                            (by omega) (by omega)
+                        · by_cases h12 : row < 13312
+                          · exact someGlobalWitness_of_interval
+                              (c := Generated.TrelChunk12.chunk) (start := 12288) (count := 1024) (row := row)
+                              Generated.TrelChunk12.certified.residual
+                              Generated.TrelChunk12.certified.startRow Generated.TrelChunk12.certified.rowCount
+                              (by omega) (by omega)
+                          · by_cases h13 : row < 14336
+                            · exact someGlobalWitness_of_interval
+                                (c := Generated.TrelChunk13.chunk) (start := 13312) (count := 1024) (row := row)
+                                Generated.TrelChunk13.certified.residual
+                                Generated.TrelChunk13.certified.startRow Generated.TrelChunk13.certified.rowCount
+                                (by omega) (by omega)
+                            · by_cases h14 : row < 15360
+                              · exact someGlobalWitness_of_interval
+                                  (c := Generated.TrelChunk14.chunk) (start := 14336) (count := 1024) (row := row)
+                                  Generated.TrelChunk14.certified.residual
+                                  Generated.TrelChunk14.certified.startRow Generated.TrelChunk14.certified.rowCount
+                                  (by omega) (by omega)
+                              · by_cases h15 : row < 16384
+                                · exact someGlobalWitness_of_interval
+                                    (c := Generated.TrelChunk15.chunk) (start := 15360) (count := 1024) (row := row)
+                                    Generated.TrelChunk15.certified.residual
+                                    Generated.TrelChunk15.certified.startRow Generated.TrelChunk15.certified.rowCount
+                                    (by omega) (by omega)
+                                · exact someGlobalWitness_of_interval
+                                    (c := Generated.TrelChunk16.chunk) (start := 16384) (count := 447) (row := row)
+                                    Generated.TrelChunk16.certified.residual
+                                    Generated.TrelChunk16.certified.startRow Generated.TrelChunk16.certified.rowCount
+                                    (by omega) (by omega)
 
 end TrelResidualRows
 end Closed
