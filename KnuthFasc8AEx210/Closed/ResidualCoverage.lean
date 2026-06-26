@@ -53,13 +53,12 @@ theorem coversFrom_sound (dimension nextRow : Nat) (ranges : List RowRange)
       simpa [coversFrom, CoversFromSpec] using h
   | cons range ranges ih =>
       have parts :
-          range.startRow = nextRow ∧
-          0 < range.rowCount ∧
-          range.startRow + range.rowCount ≤ dimension ∧
-          coversFrom dimension (range.startRow + range.rowCount) ranges = true := by
+          ((range.startRow = nextRow ∧ 0 < range.rowCount) ∧
+            range.startRow + range.rowCount ≤ dimension) ∧
+            coversFrom dimension (range.startRow + range.rowCount) ranges = true := by
         simpa [coversFrom, Bool.and_eq_true] using h
-      exact ⟨parts.1, parts.2.1, parts.2.2.1,
-        ih (range.startRow + range.rowCount) parts.2.2.2⟩
+      exact ⟨parts.1.1.1, parts.1.1.2, parts.1.2,
+        ih (range.startRow + range.rowCount) parts.2⟩
 
 /-- Soundness of the exact-coverage checker. -/
 theorem covers_sound (dimension : Nat) (ranges : List RowRange)
