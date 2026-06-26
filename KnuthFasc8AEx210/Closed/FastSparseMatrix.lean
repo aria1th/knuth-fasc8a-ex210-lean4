@@ -93,12 +93,17 @@ def smulVecMod101 (lam : Nat) (x : ByteArray) : ByteArray := Id.run do
     out := out.push (UInt8.ofNat ((lam * x.data[i]!.toNat) % 101))
   return out
 
-/-- Proposition certified by the executable eigenvector check. -/
+/-- Proposition certified by the executable eigenvector check.
+
+`ByteArray` intentionally exposes executable equality through `BEq`; the last
+field records that Boolean equality result. A later semantic bridge will turn
+this into equality of vectors over `ZMod 101`.
+-/
 def EigenSpec (m : KMC201) (lam : Nat) (x : ByteArray) : Prop :=
   m.valid = true ∧
   x.size = m.dimension ∧
   x.data.all (fun a => a.toNat < 101) = true ∧
-  mulVecMod101 m x = smulVecMod101 lam x
+  (mulVecMod101 m x == smulVecMod101 lam x) = true
 
 /-- Executable eigenvector residual check. -/
 def checkEigenMod101 (m : KMC201) (lam : Nat) (x : ByteArray) : Bool :=
