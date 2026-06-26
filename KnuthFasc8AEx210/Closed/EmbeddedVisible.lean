@@ -62,6 +62,22 @@ theorem visible76_parse_ok : parseKMP101File? visible76Bytes = some visible76 :=
 theorem eigen50_parse_ok : parseKMV101File? eigen50Bytes = some eigen50 := by
   native_decide
 
+/-- The polynomial payload is valid by the parser soundness theorem. -/
+theorem visible76_valid : visible76.Valid :=
+  parseKMP101File?_sound visible76_parse_ok
+
+/-- The eigenvector payload is valid by the parser soundness theorem. -/
+theorem eigen50_valid : eigen50.Valid :=
+  parseKMV101File?_sound eigen50_parse_ok
+
+/-- Boolean parse/check form for the embedded polynomial payload. -/
+theorem visible76_check_ok : checkKMP101File visible76Bytes = true := by
+  native_decide
+
+/-- Boolean parse/check form for the embedded eigenvector payload. -/
+theorem eigen50_check_ok : checkKMV101File eigen50Bytes = true := by
+  native_decide
+
 /-- The polynomial file contains coefficients `0` through `4106`. -/
 theorem visible76_coefficient_count : visible76.coeffs.length = 4107 := by
   native_decide
