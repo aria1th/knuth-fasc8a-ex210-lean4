@@ -18,26 +18,29 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref || github.ref_name }}
-      - name: Export canonical Lean certificate data
+      - name: Export canonical Lean certificate data and modules
         run: python3 scripts/export_lean_certificate_hex.py
-      - name: Commit generated certificate data
+      - name: Commit generated certificate artifacts
         if: github.event_name == 'pull_request'
         shell: bash
         run: |
-          if [ -z "$(git status --porcelain -- data/lean)" ]; then
-            echo "Generated certificate data is already current."
+          generated=(data/lean KnuthFasc8AEx210/Closed/Generated)
+          if [ -z "$(git status --porcelain -- "${generated[@]}")" ]; then
+            echo "Generated certificate artifacts are already current."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/lean
-          git commit -m "pr3: regenerate Lean certificate hex data"
+          git add -A "${generated[@]}"
+          git commit -m "pr3: regenerate Lean row-block certificates"
           git push origin HEAD:${{ github.head_ref }}
-      - name: Upload generated certificate data
+      - name: Upload generated certificate artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: lean-certificate-hex
-          path: data/lean
+          name: lean-certificate-artifacts
+          path: |
+            data/lean
+            KnuthFasc8AEx210/Closed/Generated
           if-no-files-found: error
           retention-days: 7
       - name: Set up Lean and restore the mathlib cache
@@ -49,7 +52,7 @@ jobs:
           test: false
           lint: false
           use-mathlib-cache: true
-      - name: Build the Lean library
+      - name: Build the ordinary Lean library
         shell: bash
         run: |
           set +e
@@ -61,6 +64,18 @@ jobs:
             cat lean-errors.log
           fi
           exit "$status"
+      - name: Build all Trel row-block certificates
+        shell: bash
+        run: |
+          set +e
+          lake build KnuthFasc8AEx210Heavy > heavy-build.log 2>&1
+          status=$?
+          if [ "$status" -ne 0 ]; then
+            grep -E -B 3 -A 20 '(^| )error:|^✖|Lean exited|build failed' heavy-build.log \
+              | tail -n 300 > heavy-errors.log
+            cat heavy-errors.log
+          fi
+          exit "$status"
       - name: Upload failed Lean build logs
         if: failure()
         uses: actions/upload-artifact@v4
@@ -69,6 +84,8 @@ jobs:
           path: |
             lean-build.log
             lean-errors.log
+            heavy-build.log
+            heavy-errors.log
           if-no-files-found: warn
           retention-days: 7
       - name: Post failed-build diagnostics to the pull request
@@ -82,7 +99,8 @@ jobs:
             echo '<!-- lean-ci-diagnostics -->'
             echo '### Lean build diagnostics'
             echo '```text'
-            cat lean-errors.log
+            [ -f lean-errors.log ] && cat lean-errors.log
+            [ -f heavy-errors.log ] && cat heavy-errors.log
             echo '```'
           } > lean-diagnostics.md
           gh pr comment "$PR_NUMBER" --body-file lean-diagnostics.md
@@ -90,7 +108,7 @@ jobs:
         shell: bash
         run: |
           if grep -RInE --include='*.lean' '(^|[[:space:]])(sorry|admit|axiom)([[:space:]]|$)' \
-              KnuthFasc8AEx210.lean KnuthFasc8AEx210; then
+              KnuthFasc8AEx210.lean KnuthFasc8AEx210Heavy.lean KnuthFasc8AEx210; then
             echo "Lean proof placeholder or local axiom found"
             exit 1
           fi
