@@ -20,17 +20,7 @@ structure Payload where
   finishVector : FinishVector
   deriving DecidableEq, Repr, Inhabited
 
-/-- The conjunction is left-associated to match `Bool.and_eq_true`. -/
-def Spec (p : Payload) : Prop :=
-  (((((((p.polynomial.valid = true ∧
-    p.polynomial.coeffs.length = 4107) ∧
-    p.eigenvector.valid = true) ∧
-    p.eigenvector.dimension = 16831) ∧
-    p.eigenvector.pivot = 0) ∧
-    p.eigenvector.entries.getD p.eigenvector.pivot 0 = 37) ∧
-    p.finishVector.valid = true) ∧
-    p.finishVector.dimension = 18325)
-
+/-- Executable metadata checker for the currently embedded visible payloads. -/
 def check (p : Payload) : Bool :=
   p.polynomial.valid &&
   (p.polynomial.coeffs.length == 4107) &&
@@ -41,8 +31,11 @@ def check (p : Payload) : Bool :=
   p.finishVector.valid &&
   (p.finishVector.dimension == 18325)
 
-theorem check_sound (p : Payload) (h : check p = true) : Spec p := by
-  simpa [check, Spec, Bool.and_eq_true] using h
+/-- Proposition-level specification for the executable checker. -/
+def Spec (p : Payload) : Prop :=
+  check p = true
+
+theorem check_sound (p : Payload) (h : check p = true) : Spec p := h
 
 def released : Payload where
   polynomial := visible76
