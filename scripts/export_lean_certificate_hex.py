@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Export finite certificates as canonical hexadecimal text.
+"""Export finite certificates and generated Lean row-block modules.
 
-The output is data, not a proof: Lean decodes and checks it.  Large sparse
+The output is data, not a proof: Lean decodes and checks it. Large sparse
 matrices are exported as independently checkable contiguous row blocks so that
-ordinary CI never has to elaborate one multi-megabyte residual computation.
+no single theorem elaborates one multi-megabyte residual computation.
 """
 
 from __future__ import annotations
@@ -16,6 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_DIR = ROOT / "data" / "lean"
 TREL_CHUNK_DIR = OUTPUT_DIR / "trel_residual"
+GENERATED_DIR = ROOT / "KnuthFasc8AEx210" / "Closed" / "Generated"
 TREL_MATRIX = Path("data/blocks/Trel_plus.kmc")
 TREL_CHUNK_ROWS = 1024
 
@@ -31,10 +32,10 @@ METADATA_ONLY_FILES = [
 
 
 def write_if_changed(path: Path, content: str) -> None:
-    if path.exists() and path.read_text(encoding="ascii") == content:
+    if path.exists() and path.read_text(encoding="utf-8") == content:
         return
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="ascii")
+    path.write_text(content, encoding="utf-8")
 
 
 def canonical_hex(data: bytes, width: int = 96) -> str:
@@ -58,19 +59,16 @@ def parse_kmc201(data: bytes) -> tuple[int, int, list[int], list[int], bytes]:
     offset = 32
 
     row_count = dimension + 1
-    row_bytes = 8 * row_count
     row_ptr = list(struct.unpack_from(f"<{row_count}Q", data, offset))
-    offset += row_bytes
+    offset += 8 * row_count
 
-    column_bytes = 4 * nnz
     columns = list(struct.unpack_from(f"<{nnz}I", data, offset))
-    offset += column_bytes
+    offset += 4 * nnz
 
     values = data[offset : offset + nnz]
     offset += nnz
 
-    representative_bytes = 8 * dimension
-    if offset + representative_bytes != len(data):
+    if offset + 8 * dimension != len(data):
         raise ValueError("unexpected KMC201 length")
     if row_ptr[0] != 0 or row_ptr[-1] != nnz:
         raise ValueError("invalid KMC201 row pointers")
@@ -105,6 +103,100 @@ def encode_residual_chunk(
     return header + pointers + column_data + local_values
 
 
+def chunk_module(index: int, start_row: int, row_count: int, hex_name: str) -> str:
+    namespace = f"TrelChunk{index:02d}"
+    return f'''import KnuthFasc8AEx210.Closed.BooleanCertificate
+import KnuthFasc8AEx210.Closed.FastHex
+import KnuthFasc8AEx210.Closed.ResidualChunk
+import KnuthFasc8AEx210.Closed.EmbeddedVisible
+
+namespace KnuthFasc8AEx210
+namespace Closed
+namespace Generated
+namespace {namespace}
+
+open ResidualChunk EmbeddedVisible
+
+def chunkHex : String :=
+  include_str ".." / ".." / ".." / "data" / "lean" / "trel_residual" /
+    "{hex_name}"
+
+def chunkBytes : ByteArray :=
+  (FastHex.decode? chunkHex).getD ByteArray.empty
+
+def chunk : Chunk :=
+  (parseChunk? chunkBytes).getD default
+
+def payloadCheck (c : Chunk) : Bool :=
+  (c.dimension == 16831) &&
+  (c.startRow == {start_row}) &&
+  (c.rowCount == {row_count}) &&
+  ResidualChunk.check c 50 eigen50Packed
+
+def PayloadSpec (c : Chunk) : Prop :=
+  payloadCheck c = true
+
+theorem payloadCheck_sound (c : Chunk) (h : payloadCheck c = true) : PayloadSpec c := h
+
+theorem released_check : payloadCheck chunk = true := by
+  native_decide
+
+def verified : VerifiedBy Chunk PayloadSpec where
+  payload := chunk
+  check := payloadCheck
+  sound := payloadCheck_sound
+  checked := released_check
+
+theorem certified : PayloadSpec chunk :=
+  VerifiedBy.proof verified
+
+end {namespace}
+end Generated
+end Closed
+end KnuthFasc8AEx210
+'''
+
+
+def aggregate_module(chunks: list[dict[str, object]]) -> str:
+    imports = "\n".join(
+        f"import KnuthFasc8AEx210.Closed.Generated.TrelChunk{int(chunk['index']):02d}"
+        for chunk in chunks
+    )
+    fields = "\n".join(
+        f"  chunk{int(chunk['index']):02d} : "
+        f"TrelChunk{int(chunk['index']):02d}.PayloadSpec "
+        f"TrelChunk{int(chunk['index']):02d}.chunk"
+        for chunk in chunks
+    )
+    values = "\n".join(
+        f"  chunk{int(chunk['index']):02d} := TrelChunk{int(chunk['index']):02d}.certified"
+        for chunk in chunks
+    )
+    return f'''import KnuthFasc8AEx210.Closed.ResidualCoverage
+{imports}
+
+namespace KnuthFasc8AEx210
+namespace Closed
+namespace Generated
+namespace TrelResidual
+
+/-- Closed Boolean-level certificate for every released `Trel+` residual row. -/
+structure Certificate : Prop where
+  coverage : ResidualCoverage.covers 16831 ResidualCoverage.trelRanges = true
+{fields}
+
+/-- All 17 row blocks are checked and cover all 16,831 rows exactly once. -/
+theorem released : Certificate where
+  coverage := ResidualCoverage.trelRanges_cover
+{values}
+
+end TrelResidual
+end Generated
+end Closed
+end KnuthFasc8AEx210
+'''
+
+
 def export_trel_chunks(manifest: dict[str, dict[str, object]]) -> None:
     source = ROOT / TREL_MATRIX
     matrix_data = source.read_bytes()
@@ -113,7 +205,9 @@ def export_trel_chunks(manifest: dict[str, dict[str, object]]) -> None:
         raise ValueError("Trel matrix is not over F_101")
 
     TREL_CHUNK_DIR.mkdir(parents=True, exist_ok=True)
-    expected_paths: set[Path] = set()
+    GENERATED_DIR.mkdir(parents=True, exist_ok=True)
+    expected_hex: set[Path] = set()
+    expected_lean: set[Path] = set()
     chunks: list[dict[str, object]] = []
 
     for index, start_row in enumerate(range(0, dimension, TREL_CHUNK_ROWS)):
@@ -121,10 +215,15 @@ def export_trel_chunks(manifest: dict[str, dict[str, object]]) -> None:
         payload = encode_residual_chunk(
             dimension, start_row, row_count, row_ptr, columns, values
         )
-        name = f"Trel_plus.rows.{start_row:05d}.{row_count:05d}.krc.hex"
-        output = TREL_CHUNK_DIR / name
-        expected_paths.add(output)
+        hex_name = f"Trel_plus.rows.{start_row:05d}.{row_count:05d}.krc.hex"
+        output = TREL_CHUNK_DIR / hex_name
+        expected_hex.add(output)
         write_if_changed(output, canonical_hex(payload))
+
+        module_path = GENERATED_DIR / f"TrelChunk{index:02d}.lean"
+        expected_lean.add(module_path)
+        write_if_changed(module_path, chunk_module(index, start_row, row_count, hex_name))
+
         chunks.append(
             {
                 "index": index,
@@ -132,12 +231,20 @@ def export_trel_chunks(manifest: dict[str, dict[str, object]]) -> None:
                 "row_count": row_count,
                 "nnz": row_ptr[start_row + row_count] - row_ptr[start_row],
                 "hex_file": str(output.relative_to(ROOT)),
+                "lean_module": str(module_path.relative_to(ROOT)),
                 **file_record(payload),
             }
         )
 
+    aggregate_path = GENERATED_DIR / "TrelResidual.lean"
+    expected_lean.add(aggregate_path)
+    write_if_changed(aggregate_path, aggregate_module(chunks))
+
     for stale in TREL_CHUNK_DIR.glob("*.krc.hex"):
-        if stale not in expected_paths:
+        if stale not in expected_hex:
+            stale.unlink()
+    for stale in GENERATED_DIR.glob("TrelChunk*.lean"):
+        if stale not in expected_lean:
             stale.unlink()
 
     obsolete_full_hex = OUTPUT_DIR / "Trel_plus.kmc.hex"
