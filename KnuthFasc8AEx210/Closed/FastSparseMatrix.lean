@@ -107,14 +107,15 @@ def EigenSpec (m : KMC201) (lam : Nat) (x : ByteArray) : Prop :=
 
 /-- Executable eigenvector residual check. -/
 def checkEigenMod101 (m : KMC201) (lam : Nat) (x : ByteArray) : Bool :=
-  decide (EigenSpec m lam x)
+  m.valid &&
+  (x.size == m.dimension) &&
+  x.data.all (fun a => a.toNat < 101) &&
+  (mulVecMod101 m x == smulVecMod101 lam x)
 
 /-- Soundness of `checkEigenMod101`. -/
 theorem checkEigenMod101_sound (m : KMC201) (lam : Nat) (x : ByteArray)
     (h : checkEigenMod101 m lam x = true) : EigenSpec m lam x := by
-  have h' : decide (EigenSpec m lam x) = true := by
-    simpa [checkEigenMod101] using h
-  exact of_decide_eq_true h'
+  simpa [checkEigenMod101, EigenSpec, Bool.and_eq_true] using h
 
 /-- A small identity matrix used to regression-test the packed execution path. -/
 def identity2 : KMC201 where
@@ -135,6 +136,9 @@ example : identity2.valid = true := by native_decide
 example : mulVecMod101 identity2 vector79 = vector79 := by native_decide
 
 example : checkEigenMod101 identity2 1 vector79 = true := by native_decide
+
+example : EigenSpec identity2 1 vector79 :=
+  checkEigenMod101_sound identity2 1 vector79 (by native_decide)
 
 end FastSparseMatrix
 end Closed
