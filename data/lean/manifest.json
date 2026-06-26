@@ -9,6 +9,7 @@
     "size": 3119425
   },
   "data/blocks/Trel_plus.kmc": {
+    "hex_file": "data/lean/Trel_plus.kmc.hex",
     "sha256": "55c89f1883f95c0a9cce964bd2193dbc1220badf216a75e198f50b24da9844cb",
     "size": 2880301
   },
