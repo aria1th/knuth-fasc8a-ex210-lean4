@@ -129,14 +129,28 @@ def chunk : Chunk :=
 
 def payloadCheck (c : Chunk) : Bool :=
   (c.dimension == 16831) &&
-  (c.startRow == {start_row}) &&
-  (c.rowCount == {row_count}) &&
-  ResidualChunk.check c 50 eigen50Packed
+  ((c.startRow == {start_row}) &&
+    ((c.rowCount == {row_count}) &&
+      ResidualChunk.check c 50 eigen50Packed))
 
-def PayloadSpec (c : Chunk) : Prop :=
-  payloadCheck c = true
+structure PayloadSpec (c : Chunk) : Prop where
+  dimension : c.dimension = 16831
+  startRow : c.startRow = {start_row}
+  rowCount : c.rowCount = {row_count}
+  residual : ResidualChunk.Spec c 50 eigen50Packed
 
-theorem payloadCheck_sound (c : Chunk) (h : payloadCheck c = true) : PayloadSpec c := h
+theorem payloadCheck_sound (c : Chunk) (h : payloadCheck c = true) : PayloadSpec c := by
+  have parts :
+      c.dimension = 16831 ∧
+        (c.startRow = {start_row} ∧
+          (c.rowCount = {row_count} ∧
+            ResidualChunk.check c 50 eigen50Packed = true)) := by
+    simpa [payloadCheck, Bool.and_eq_true] using h
+  exact
+    {{ dimension := parts.1
+      startRow := parts.2.1
+      rowCount := parts.2.2.1
+      residual := ResidualChunk.check_sound c 50 eigen50Packed parts.2.2.2 }}
 
 theorem released_check : payloadCheck chunk = true := by
   native_decide
@@ -180,12 +194,12 @@ namespace Closed
 namespace Generated
 namespace TrelResidual
 
-/-- Closed Boolean-level certificate for every released `Trel+` residual row. -/
+/-- Semantic certificate for every released `Trel+` residual row. -/
 structure Certificate : Prop where
   coverage : ResidualCoverage.covers 16831 ResidualCoverage.trelRanges = true
 {fields}
 
-/-- All 17 row blocks are checked and cover all 16,831 rows exactly once. -/
+/-- All 17 semantic row-block certificates cover all 16,831 rows exactly once. -/
 theorem released : Certificate where
   coverage := ResidualCoverage.trelRanges_cover
 {values}
