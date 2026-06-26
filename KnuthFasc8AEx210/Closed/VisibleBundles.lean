@@ -60,6 +60,17 @@ theorem paperFactor_dvd_of_eval_99_eq_zero {p : F101[X]}
   exact hfac.trans hx
 
 /--
+The remaining visible-factor bridge.
+
+Future commits should replace the `visible_factor` field by proved checkers for
+`r = g(A^2) beta`, `A^2 r = 76 r`, `A v = 50 v`, and the nonzero visibility
+functional.
+-/
+structure VisibleAlgebraBridge (Q5 : ℤ[X]) : Prop where
+  parsed : ParsedVisibleBundle
+  visible_factor : paperFactor ∣ mod101 Q5
+
+/--
 A lower-level visible bridge: it is enough to prove root vanishing at `99`.
 
 The finite certificate checkers should ultimately target this structure before
@@ -74,17 +85,6 @@ def VisibleRootBridge.toVisibleAlgebraBridge {Q5 : ℤ[X]}
     (b : VisibleRootBridge Q5) : VisibleAlgebraBridge Q5 where
   parsed := b.parsed
   visible_factor := paperFactor_dvd_of_eval_99_eq_zero b.root_at_99
-
-/--
-The remaining visible-factor bridge.
-
-Future commits should replace the `visible_factor` field by proved checkers for
-`r = g(A^2) beta`, `A^2 r = 76 r`, `A v = 50 v`, and the nonzero visibility
-functional.
--/
-structure VisibleAlgebraBridge (Q5 : ℤ[X]) : Prop where
-  parsed : ParsedVisibleBundle
-  visible_factor : paperFactor ∣ mod101 Q5
 
 /-- Convert the split visible bridge to the bundle consumed by final assembly. -/
 def VisibleAlgebraBridge.toVisibleFactorBundle {Q5 : ℤ[X]}
