@@ -10,7 +10,9 @@ separate Lean checkers.
 | Bundle | Lean structure | Feeds `SourceRepositoryCertificate` fields | Current status |
 |---|---|---|---|
 | Denominator / transfer bound | `BridgeBundles.DenominatorBundle` | `closed_constant`, `open_constant`, `open_dvd_transferDet` | Interface only |
-| Visible closed factor | `BridgeBundles.VisibleFactorBundle` | `visible_factor` | Metadata payload checked; algebraic visible-factor bridge remains |
+| Visible payload metadata | `VisibleBundles.ParsedVisibleBundle` | Input to visible-factor checker | Closed in Lean |
+| Visible algebraic bridge | `VisibleBundles.VisibleAlgebraBridge` | `visible_factor` | Only `paperFactor ∣ mod101 Q5` remains |
+| Visible closed factor | `BridgeBundles.VisibleFactorBundle` | `visible_factor` | Assembled from `VisibleAlgebraBridge` |
 | Trel residual | `BridgeBundles.TrelResidualBundle` | Evidence used by the future `closed_simple` checker | Lean-checked row-block residuals, coverage, and global-row witnesses |
 | Capacity sectors | `BridgeBundles.CapacityBundle` | `closedSector`, `oneEndpointSector`, `completedSector`, `transferDet_mod101`, `closed_simple`, `oneEndpoint_regular`, `completed_simple` | Interface plus checked `Trel+` residual sub-bundle |
 | Source bridge | `BridgeBundles.SourceBridgeBundles` | All fields | Converts bundle evidence to `SourceRepositoryCertificate` |
@@ -29,6 +31,17 @@ KRC101 row-block bytes
 
 This is the first substantial replacement of old C++ verifier output by a
 Lean-checked certificate path.
+
+## Current Lean-checked visible payload chain
+
+```text
+KMP101 / KMV101 / finish-vector bytes
+  -> hex decode
+  -> binary parsers
+  -> metadata checks
+  -> ParsedVisibleBundle
+  -> VisibleAlgebraBridge once the algebraic visible-factor proof is added
+```
 
 ## Next bundle targets
 
